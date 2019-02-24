@@ -1,0 +1,569 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+<style>
+
+    .layui-layer-shade {
+        display: none;
+    }
+
+    .layui-select-title input {
+        width: 180px;
+    }
+</style>
+<div>
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="/demo/">餐厅管理</a>
+        <a><cite>餐厅管理</cite></a>
+    </span>
+    <div class="layui-form" style="background-color:#F2F2F2;padding:30px 20px;margin-top:20px;">
+        <div class="layui-form-item">
+            餐厅编号：
+            <div class="layui-inline">
+                <input class="layui-input" name="searchCode" id="searchCode" autocomplete="off">
+            </div>
+            餐厅名称：
+            <div class="layui-inline">
+                <input class="layui-input" name="searchName" id="searchName" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-top:30px;">
+            <button class="layui-btn btn-search" data-type="search">条件查询</button>
+            <button class="layui-btn" data-type="showGenerateLayer">新增餐厅</button>
+            <button class="layui-btn" data-type="getCheckData">选中行删除</button>
+        </div>
+    </div>
+    <table class="layui-hide" id="test" lay-filter="sysuser"> </table>
+</div>
+<div id="generate_layer" style="display:none; padding:40px;">
+    <div class="layui-form layui-form-pane" action="" lay-filter="generate-form">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">餐厅编号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stCode" id="stCode" autocomplete="off" placeholder="餐厅编号" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">餐厅名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stName" id="stName" autocomplete="off" placeholder="餐厅名称" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">餐厅英文名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stName_en" id="stName_en" autocomplete="off" placeholder="餐厅英文名称" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">地区</label>
+                <div class="layui-input-inline">
+                    <select name="stRegion" id="stRegion" lay-verify="required">
+                        <option value="">请选择地区</option>
+                        <option value="North">North</option>
+                        <option value="South">South</option>
+                        <option value="Central">Central</option>
+                        <option value="East">East</option>
+                        <option value="SouthWest">SouthWest</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">城市</label>
+                <div class="layui-input-inline">
+                    <select name="stCity" id="stCity" lay-verify="required">
+                        <option value="">请选择城市</option>
+                        <option value="ShenZhen">ShenZhen</option>
+                        <option value="GuangZhou">GuangZhou</option>
+                        <option value="Nanning">Nanning</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">品牌</label>
+                <div class="layui-input-inline">
+                    <select name="stBrand" id="stBrand">
+                        <option value="">请选择品牌</option>
+                        <option value="Genki">Genki</option>
+                        <option value="Ippudo">Ippudo</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline" style="width:92%;">
+                <label class="layui-form-label">位置</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stLocation" id="stLocation" autocomplete="off" placeholder="位置" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">OM</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stOM" id="stOM" autocomplete="off" placeholder="OM" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">DM</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stDM" id="stDM" autocomplete="off" placeholder="DM" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline" style="width:45%;">
+                <label class="layui-form-label">地址</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stAddress" id="stAddress" autocomplete="off" placeholder="地址" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline" style="width:45%;">
+                <label class="layui-form-label">英文地址</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stAddress_en" id="stAddress_en" autocomplete="off" placeholder="英文地址" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">开业日期</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stOpenDate" id="stOpenDate" autocomplete="off" class="layui-input" lay-verify="date">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">关店日期</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stCloseDate" id="stCloseDate" autocomplete="off" class="layui-input" >
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">电话</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stTel" id="stTel" autocomplete="off" placeholder="电话" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">传真</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stFax" id="stFax" autocomplete="off" placeholder="传真" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stEmail" id="stEmail" autocomplete="off" placeholder="邮箱" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">IP</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stIP" id="stIP" autocomplete="off" placeholder="IP" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">面积</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stSpace" id="stSpace" autocomplete="off" placeholder="面积" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">座位数</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stSeat" id="stSeat" autocomplete="off" placeholder="座位数" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">餐厅经理姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stSM" id="stSM" autocomplete="off" placeholder="餐厅经理姓名" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">电话</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stSMTel" id="stSMTel" autocomplete="off" placeholder="电话" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">邮政编码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stPOST" id="stPOST" autocomplete="off" placeholder="邮政编码" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">营业时间</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stBizTime" id="stBizTime" autocomplete="off" placeholder="营业时间" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <input type="text" name="stComments" id="stComments" autocomplete="off" placeholder="备注" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <button class="layui-btn" data-type="generate" id="generate_btn" lay-submit lay-filter="submit">立即创建</button>
+            <button class="layui-btn layui-layer-btn1" lay-filter="demo2" data-type="closeGenerateLayer">取消</button>
+        </div>
+    </div>
+
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script>layui.use(['table', 'element', 'layer', 'form', 'laydate'], function () {
+        var table = layui.table;
+        var element = layui.element;
+        var layer = layui.layer;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var generateLayer_index = 0;
+        var layType = true;//true 新增  false 编辑
+        var store_id = "";
+        //日期
+        laydate.render({
+            elem: '#stOpenDate'
+        });
+        laydate.render({
+            elem: '#stCloseDate'
+        });
+
+
+        table.render({
+            elem: '#test'
+            , url: '/api/dimstoredata/search/'
+            , contentType: 'application/json'
+            , method: 'post'
+            , parseData: function (res) { //res 即为原始返回的数据
+                return {
+                    "status": res.isSuccess,
+                    "code": res.isSuccess == true ? 0 : 1, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": res.content.total, //解析数据长度
+                    "data": res.content.data //解析数据列表
+                };
+            }
+
+            , cols: [[
+                { type: 'checkbox', fixed: 'left' }
+                , { field: 'id', width: 50, title: 'ID', sort: true, fixed: 'left' }
+                , { field: 'stCode', width: 100, title: '餐厅编号', sort: true, fixed: 'left' }
+                , { field: 'stName', title: '餐厅名', sort: true }
+                , { field: 'stRegion', title: '所属地区' }
+                , { field: 'stCity', title: '城市', sort: true }
+                , { field: 'stBrand', title: '品牌', sort: true }
+                , { field: 'stDM', title: 'DM', sort: true }
+                , { field: 'stOpenDate', title: '开业日期', sort: true }
+                , { field: 'stCloseDate', title: '关店日期', sort: true }
+                , { field: 'stTel', title: '电话', sort: true }
+                , { field: 'stFax', title: '传真', sort: true }
+                , { field: 'stSeat', title: '座位数', sort: true }
+                , { fixed: 'right', align: 'center', toolbar: '#barDemo', fixed: 'right' } //这里的toolbar值是模板元素的选择器
+            ]]
+            , id: 'testReload'
+            , page: true,
+            text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+
+
+        table.on('checkbox(sysuser)', function (obj) {
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(sysuser)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                layer.msg('ID：' + data.id + ' 的查看操作');
+            } else if (obj.event === 'del') {
+                console.log("delete");
+                let confirm_title = "确认删除店铺编号" + data.id + "的记录么";
+                layer.confirm(confirm_title, function (index) {
+                    layer.close(index);
+                    axios.delete('/api/dimstoredata/' + data.id)
+                        .then(function (response) {
+                            console.log(response);
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+                            obj.del();
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+
+                });
+            } else if (obj.event === 'edit') {
+                // layer.alert('编辑行：<br>' + JSON.stringify(data))
+                console.log(data);
+                store_id = data.id;
+                layType = false;
+                showLayer(data);
+            }
+        });
+
+        var $ = layui.$, active = {
+            getCheckData: function () { //获取选中数据
+                var checkStatus = table.checkStatus('testReload')
+                    , data = checkStatus.data;
+
+
+                layer.confirm("确认删除" + data.length + "条记录么", function (index) {
+                    layer.close(index);
+
+                    let ids = [];
+                    let parms = "?";
+                    for (let i = 0; i < data.length; i++) {
+                        ids.push(data[i].id);
+                        parms += "ids=" + data[i].id + "&";
+                    }
+                    parms = parms.substring(0, parms.length - 1);
+                    //layer.alert(JSON.stringify(data));
+                    axios.delete("/api/dimstoredata/batchdelete/" + parms)
+                        .then(function (response) {
+                            console.log(response);
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+
+                            //移除
+                            let tabledata = table.cache.testReload;
+                            //for (let i = 0; i < tabledata.length; i++) {
+                            //    for (let j = 0; j < ids.length; j++) {
+                            //        if (tabledata[i].user_Id == ids[j]) {
+                            //            tabledata.splice(i, 1);
+                            //        }
+                            //    }
+                            //}
+                            //console.log(tabledata);
+                            tableReload(tabledata);
+
+
+                        })
+                        .catch(function (error) {
+                            layer.msg("发生了预料之外的错误!");
+                            console.log(error);
+                        });
+                });
+
+
+            },
+            search: function () {
+                console.log('reload');
+                let pars = {
+                    limit: 10,
+                    page: 1,
+                    StCode: $("#searchCode").val(),
+                    StName: $("#searchName").val(),
+                }
+                //执行重载
+                console.log(pars);
+                table.reload('testReload', {
+                    where: pars,
+                    contentType: 'application/json',
+                    method: 'post'
+                });
+            },
+            showGenerateLayer: function () {
+                console.log('show');
+                layType = true;
+                showLayer();
+            },
+            closeGenerateLayer: function () {
+                layer.close(generateLayer_index);
+            },
+
+        };
+        form.on('submit(submit)', function () {
+            console.log('save');
+            let model = {
+                stCode: $("#stCode").val(),
+                stRegion: $("#stRegion").val(),
+                stCity: $("#stCity").val(),
+                stLocation: $("#stLocation").val(),
+                stBrand: $("#stBrand").val(),
+                stOM: $("#stOM").val(),
+                stDM: $("#stDM").val(),
+                stName: $("#stName").val(),
+                stName_en: $("#stName_en").val(),
+                stAddress: $("#stAddress").val(),
+                stAddress_en: $("#stAddress_en").val(),
+                stType: $("#stType").val(),
+                stOpenDate: $("#stOpenDate").val(),
+                stCloseDate: $("#stCloseDate").val(),
+                stTel: $("#stTel").val(),
+                stFax: $("#stFax").val(),
+                stEmail: $("#stEmail").val(),
+                stIP: $("#stIP").val(),
+                stSpace: $("#stSpace").val(),
+                stSeat: $("#stSeat").val(),
+                stBizTime: $("#stBizTime").val(),
+                stPOST: $("#stPOST").val(),
+                stSM: $("#stSM").val(),
+                stSMTel: $("#stSMTel").val(),
+                stComments: $("#stComments").val()
+            };
+
+            console.log(model);
+            let url = "/api/dimstoredata";
+            let method = "POST";
+            if (layType != true) {
+                url = "/api/dimstoredata/" + store_id;
+                method = "PUT";
+            }
+            axios({ url: url, method: method, data: model })
+                .then(function (response) {
+                    console.log(response);
+                    layer.msg(response.data.message);
+                    if (!response.data.isSuccess) {
+                        return;
+                    }
+                    let datatable = table.cache.testReload;
+                    console.log(datatable);
+                    if (layType != true) {
+                        //修改
+                        for (let i = 0; i < datatable.length; i++) {
+                            if (datatable[i].id == response.data.content.id) {
+                                datatable.splice(i, 1, response.data.content);
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        //新增
+                        datatable.unshift(response.content)
+                    }
+                    tableReload(datatable)
+                    layer.close(generateLayer_index);
+                })
+                .catch(function (error) {
+
+                    layer.msg("发生了预料之外的错误!");
+                    console.log(error);
+                });
+
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        }),
+            $('.layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        function showLayer(data) {
+
+            console.log(table);
+            console.log(table.cache);
+            initFormValue(data);
+            let title = "新增餐厅";
+            document.getElementById("stCode").disabled = false;
+            document.getElementById("generate_btn").innerHTML = "立即创建";
+            if (layType != true) {
+                title = "编辑餐厅";
+                document.getElementById("stCode").disabled = true;
+                document.getElementById("generate_btn").innerHTML = "立即修改";
+            }
+            generateLayer_index = layer.open({
+                type: 1
+                , title: title //不显示标题栏
+                , closeBtn: false
+                , area: ['1100px', '750px']
+                , shade: 0.8
+                , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                //, btn: ['火速围观', '残忍拒绝']
+                , btnAlign: 'c'
+                , moveType: 1 //拖拽模式，0或者1
+                , content: $('#generate_layer') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+
+            });
+        };
+        function initFormValue(data) {
+            if (data == undefined) {
+
+                form.val("generate-form", {
+                    stCode: "",
+                    stRegion: "",
+                    stCity: "",
+                    stLocation: "",
+                    stBrand: "",
+                    stOM: "",
+                    stDM: "",
+                    stName: "",
+                    stName_en: "",
+                    stAddress: "",
+                    stAddress_en: "",
+                    stType: "",
+                    stOpenDate: "",
+                    stCloseDate: "",
+                    stTel: "",
+                    stFax: "",
+                    stEmail: "",
+                    stIP: "",
+                    stSpace: "",
+                    stSeat: "",
+                    stBizTime: "",
+                    stPOST: "",
+                    stSM: "",
+                    stSMTel: "",
+                    stComments: ""
+                })
+                return;
+            }
+            form.val("generate-form", {
+                stCode: data.stCode,
+                stRegion: data.stRegion,
+                stCity: data.stCity,
+                stLocation: data.stLocation,
+                stBrand: data.stBrand,
+                stOM: data.stOM,
+                stDM: data.stDM,
+                stName: data.stName,
+                stName_en: data.stName_en,
+                stAddress: data.stAddress,
+                stAddress_en: data.stAddress_en,
+                stType: data.stType,
+                stOpenDate: data.stOpenDate,
+                stCloseDate: data.stCloseDate,
+                stTel: data.stTel,
+                stFax: data.stFax,
+                stEmail: data.stEmail,
+                stIP: data.stIP,
+                stSpace: data.stSpace,
+                stSeat: data.stSeat,
+                stBizTime: data.stBizTime,
+                stPOST: data.stPOST,
+                stSM: data.stSM,
+                stSMTel: data.stSMTel,
+                stComments: data.stComments
+            })
+        }
+
+
+        function tableReload(datatable) {
+            console.log(datatable);
+            table.reload("testReload", {
+                data: datatable
+            })
+        }
+
+    });</script>
+

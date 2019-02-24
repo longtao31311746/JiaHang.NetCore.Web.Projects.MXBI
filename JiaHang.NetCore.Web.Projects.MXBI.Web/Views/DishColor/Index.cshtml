@@ -1,0 +1,370 @@
+﻿
+@{
+    ViewData["Title"] = "色碟分差";
+}
+
+<div>
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="/demo/">模块</a>
+        <a><cite>色碟分差</cite></a>
+    </span>
+    <div class="layui-form" style="background-color:#F2F2F2;padding:30px 20px;margin-top:20px;">
+        <div class="layui-form-item">
+            品牌：
+            <div class="layui-inline">
+                <select name="interest" id="search_brand" lay-filter="brand">
+                    <option value=""></option>
+                </select>
+            </div>
+            区域：
+            <div class="layui-inline">
+                <select name="interest" id="search_region" lay-filter="region">
+                    <option value=""></option>
+                </select>
+            </div>
+            城市：
+            <div class="layui-inline">
+                <select name="interest" id="search_city" lay-filter="city">
+                    <option value=""></option>
+                </select>
+            </div><br/>
+            DM：
+            <div class="layui-inline">
+                <select name="interest" id="search_dm" lay-filter="dm">
+                    <option value=""></option>
+                </select>
+            </div>
+            店铺：
+            <div class="layui-inline">
+                <select name="interest" id="search_store" lay-filter="store">
+                    <option value=""></option>
+                </select>
+            </div><br/>
+            <div class="layui-inline">
+                <label class="layui-form-label">日期范围</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="end" placeholder="-">
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-form-item" style="margin-top:30px; ">
+            <button class="layui-btn btn-search" data-type="search">条件查询</button>
+            <a class="layui-btn" data-type="export">导出</a>
+        </div>
+    </div>
+    <table class="layui-hide" id="test" lay-filter="sysuser" width="2500">
+        @*<thead>
+                <tr>
+                    <th lay-data="{align:'center'}" colspan="10">店铺8088</th>
+                    <th lay-data="{align:'center'}" colspan="3">Belt</th>
+                    <th lay-data="{align:'center'}" colspan="3">A-La-Cart</th>
+                    <th lay-data="{align:'center'}" colspan="2"></th>
+                </tr>
+                <tr>
+                    <th lay-data="{field:'productCode', width:120}">产品编号</th>
+                    <th lay-data="{field:'productName', width:120}">产品名称</th>
+                    <th lay-data="{field:'dish_Color', width:200}">色碟</th>
+                    <th lay-data="{field:'category', width:200}">类别</th>
+                    <th lay-data="{field:'price', width:120}">价格</th>
+                    <th lay-data="{field:'cost', width:120}">成本单价</th>
+                    <th lay-data="{field:'tradeAmount', width:200}">售出数</th>
+                    <th lay-data="{field:'tradePercent', width:200}">售出数%</th>
+                    <th lay-data="{field:'tradeMoney', width:120}">金额</th>
+                    <th lay-data="{field:'tradeAmountBelt', width:120}">金额%</th>
+                    <th lay-data="{field:'tradeAmountBelt', width:200}">售出</th>
+                    <th lay-data="{field:'tradePercentBelt', width:200}">售出数%</th>
+                    <th lay-data="{field:'tradeMoneyBelt', width:120}">金额</th>
+                    <th lay-data="{field:'tradeAmountAlacart', width:200}">售出</th>
+                    <th lay-data="{field:'tradePercentAlacart', width:200}">售出数%</th>
+                    <th lay-data="{field:'tradeMoneyAlacart', width:120}">金额</th>
+                    <th lay-data="{field:'costMoney', width:200}">成本金额%</th>
+                    <th lay-data="{field:'costPercent', width:120}">成本%</th>
+                </tr>
+            </thead>*@
+    </table>
+</div>
+<script>
+    var cityData = [];
+    var cityOptions = [];
+    var cityDP = [];
+
+    layui.use(['table', 'element', 'layer', 'form', 'laydate'], function () {
+        var $ = layui.$,
+            table = layui.table,
+            element = layui.element,
+            layer = layui.layer,
+            form = layui.form,
+            laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#end'
+            , range: true
+        });
+
+        //表格
+        table.render({
+            id: 'testReload',
+            elem: '#test',
+            url: '/api/DishColorData/search/',
+            cellMinWidth: 110, //定义最小列宽
+            contentType: 'application/json',
+            method: 'post',
+            parseData: function (res) { //res 即为原始返回的数据
+                return {
+                    "status": res.isSuccess,
+                    "code": res.isSuccess == true ? 0 : 1, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": res.content.total, //解析数据长度
+                    "data": res.content.data //解析数据列表
+                };
+            },
+            cols: [
+                [
+                    //标题栏
+                    { align: 'center', title: '全国', colspan: 9 }
+                    //, { align: 'center', title: '', colspan: 2 }//colspan即横跨的单元格数，这种情况下不用设置field和width
+                ], [
+                    //rowspan即纵向跨越的单元格数
+                    { field: 'dishColorName', rowspan: 2, title: '碟色', sort: true, align: 'center' }, 
+                    {
+                        field: 'price', rowspan: 2, title: '单价', align: 'center',
+                        sort: true,
+                        templet: function (data) {
+                            // data为记录一行数据
+                            return data.price < 0 ? '' : data.price;
+                        }
+                    },
+                    { field: 'productCount', rowspan: 2, title: '产品数', sort: true, align: 'center' },
+                    {
+                        field: 'productPercent', rowspan: 2, title: '产品占比', sort: true, align: 'center', width: 150,
+                        templet: function (data) {
+                            var per = !$.isNumeric(data.productPercent) ? 0 : data.productPercent;
+                            return per.toFixed(2) + '%';
+                        }
+                    },
+                    { field: 'belt', rowspan: 2, title: 'Belt售出数', sort: true, align: 'center', width: 150 },
+                    { field: 'pos', rowspan: 2, title: 'POS售出数', sort: true, align: 'center', width: 150 },
+                    {
+                        field: 'posPercent', rowspan: 2, title: 'POS售出数%', sort: true, align: 'center', width: 170,
+                        templet: function (data) {
+                            var per = !$.isNumeric(data.posPercent) ? 0 : data.posPercent;
+                            return per.toFixed(2) + '%';
+                        }
+                    },
+                    { field: 'beltPosDiff', rowspan: 2, title: '差异数量', sort: true, align: 'center', width: 150, },
+                    { field: 'diffMoney', rowspan: 2, title: '差异金额', sort: true, align: 'center', width: 150, },
+                ]
+            ],
+            text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            },
+            done: function (res, curr, count) {
+                //设置样式
+                $('th').css({ 'background-color': '#EEAD0E', 'font-size': '18px', 'font': 'bold' });
+            }
+        });
+
+        function tableReload(datatable) {
+            table.reload("testReload", {
+                data: datatable
+            });
+        }
+
+        var active = {
+            //查询操作传参数
+            search: function () {
+                var date_region = document.getElementById("end").value;
+                var _start, _end;
+                if (date_region != "") {
+                    _start = date_region.split(" - ")[0] + ' 00:00:00';
+                    _end = date_region.split(" - ")[1] + ' 00:00:00';
+                }
+
+                var pars = {
+                    brand: $("#search_brand").val(),
+                    region: $("#search_region").val(),
+                    city: $("#search_city").val(),
+                    dm: $("#search_dm").val(),
+                    storeCode: $("#search_store").val(),
+                    StartTime: _start,
+                    EndTime: _end,
+                };
+
+                var sel = pars.stRegion == "" ? "" : pars.stRegion + ","  + _start + " 至  " + _end;
+                table.reload('testReload', {
+                    where: pars,
+                    contentType: 'application/json',
+                    method: 'post'
+                });
+                var spans = $("thead tr:first span");
+                $(spans[0]).html(sel);
+            },
+            //导出
+            export: function () {
+                console.log('export');
+
+                var date_region = document.getElementById("end").value;
+                var _start, _end;
+                if (date_region != "") {
+                    _start = date_region.split(" - ")[0] + ' 00:00:00';
+                    _end = date_region.split(" - ")[1] + ' 00:00:00';
+                }
+
+                var pars = {
+                    brand: $("#search_brand").val(),
+                    region: $("#search_region").val(),
+                    city: $("#search_city").val(),
+                    dm: $("#search_dm").val(),
+                    storeCode: $("#search_store").val(),
+                    StartTime: _start,
+                    EndTime: _end,
+                };
+
+                var url = "/api/DishColorData/export?" + $.param(pars);
+                window.location.href = url;
+            }
+        };
+
+        $('.layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        ///
+        /// init
+        ///
+        function init() {
+            //  getUserGroups();
+            getCityData();
+        }
+        init();
+
+        ///
+        /// functions
+        ///
+
+        //第一个下拉框的改变事件
+        form.on('select(region)', function (data) {
+            $("#search_dm").html("");
+            $('#search_dm').append(new Option("", ""));
+            $("#search_store").html("");
+            $('#search_store').append(new Option("", ""));
+            initSecondSelect(data.value);
+
+        }); 
+        //第二个下拉框的改变事件
+        form.on('select(city)', function (data) {
+            $("#search_store").html("");
+            $('#search_store').append(new Option("", ""));
+            console.log(data);
+            initThreeSelect(data.value);
+        });
+        //第三个下拉框的改变事件
+        form.on('select(dm)', function (data) {
+            console.log(data);
+            initFourSelect(data.value);
+        });
+
+        //初始化第一个下拉框
+        function initFirstSelect(stregion) {
+            console.log("init_select:" + stregion);
+            $("#search_region").html("");
+            $('#search_region').append(new Option("全国", ""));
+            if (cityData.length == 0) {
+                form.render('select');
+                return;
+            }
+            for (let i = 0; i < cityData.length; i++) {
+                $('#search_region').append(new Option(cityData[i].stregion, cityData[i].stregion));
+            }
+            if (stregion != null && stregion != "") {
+
+                //$("select[name='result']").val(11);
+                var select = 'dd[lay-value=' + stregion + ']';
+                $('#search_region').siblings("div.layui-form-select").find('dl').find(select).click();
+            }
+
+            form.render('select');
+        }
+        //初始化第二个下拉框
+        function initSecondSelect(stregion) {
+            console.log("init_second_select:" + stregion);
+            let listStcity = [];
+            for (let i = 0; i < cityData.length; i++) {
+                console.log(cityData[i].stregion);
+                if (cityData[i].stregion == stregion) {
+                    listStcity = cityData[i].listStcity;
+                    break;
+                }
+            }
+            console.log(listStcity);
+            $("#search_city").html("");
+            $('#search_city').append(new Option("", ""));
+            cityOptions = listStcity;
+            for (let j = 0; j < listStcity.length; j++) {
+                $('#search_city').append(new Option(listStcity[j].stcity, listStcity[j].stcity));
+            }
+            form.render('select');
+        }
+        //初始化第三个下拉框
+        function initThreeSelect(stcity) {
+            console.log(cityOptions);
+            console.log("init_Threeselect:" + stcity);
+            //获取不到值undefined
+            let listStdm = [];
+            for (let i = 0; i < cityOptions.length; i++) {
+
+                if (cityOptions[i].stcity == stcity) {
+                    listStdm = cityOptions[i].listStdm;
+                    break;
+                }
+            }
+            console.log(listStdm);
+            $("#search_dm").html("");
+            $('#search_dm').append(new Option("", ""));
+            cityDP = listStdm;
+            for (let j = 0; j < listStdm.length; j++) {
+                $('#search_dm').append(new Option(listStdm[j].stdm, listStdm[j].stdm));
+            }
+            form.render('select');
+        }
+        //初始化第四个下拉框
+        function initFourSelect(stdm) {
+            console.log(cityDP);
+            console.log("init_Fourselect:" + stdm);
+            //获取不到值undefined
+            let listStore = [];
+            for (let i = 0; i < cityDP.length; i++) {
+
+                if (cityDP[i].stdm == stdm) {
+                    listStore = cityDP[i].listStore;
+                    break;
+                }
+            }
+            console.log(listStore);
+            $("#search_store").html("");
+            $('#search_store').append(new Option("", ""));
+
+            for (let j = 0; j < listStore.length; j++) {
+                $('#search_store').append(new Option(listStore[j].ststore, listStore[j].ststore));
+            }
+            form.render('select');
+        }
+
+        //获取联动数据josn
+        function getCityData() {
+            axios.get('/api/FactPMIXData/acquisitioncitydata')
+                .then(function (response) {
+                    console.log(response);
+                    cityData = response.data.content;
+                    initFirstSelect();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    });
+</script>

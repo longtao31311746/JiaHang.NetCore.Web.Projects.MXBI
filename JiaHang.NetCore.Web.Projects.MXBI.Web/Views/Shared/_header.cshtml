@@ -1,0 +1,79 @@
+﻿
+<div class="layui-header">
+    <div class="layui-logo" style="width: 100%;text-align: left;font-size: 20px;color: #B5C0C2;">
+        美心中国报表统一管理平台  
+    </div>
+    <!-- 头部区域（可配合layui已有的水平导航） -->
+    <ul class="layui-nav layui-layout-left">
+    </ul>
+    <ul class="layui-nav layui-layout-right" id="head_menu">
+        @*<li class="layui-nav-item"><a href="">系统管理</a></li>
+        <li class="layui-nav-item"><a href="" >KDS Report</a></li>*@
+        <li class="layui-nav-item">
+            <a href="javascript:;">
+                <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                <span id="header_account_name">未登录</span>
+            </a>
+            <dl class="layui-nav-child">
+                <dd><a href="">基本资料</a></dd>
+                <dd><a href="">安全设置</a></dd>
+            </dl>
+        </li>
+        <li class="layui-nav-item"><a href="javascript:singout();">退出</a></li>
+    </ul>
+</div>
+<script >
+
+   
+    //读取所有的菜单
+    var routes_str = window.localStorage.getItem("userroutes");
+    if (routes_str != null) {
+        routes = JSON.parse(routes_str);
+        //取出所有一级模块
+        var modules = new Array();
+        for (let i = 0; i < routes.length; i++) {
+            //  module.push([routes[i].])
+            //console.log(routes[i]);
+            //let module = new { moduleId: routes[i].moduleId, defaultUrl: routes[i].controllers[0].methods[0].completePath, moduleName: routes[i].moduleName };
+            modules.push({ moduleId: routes[i].moduleId, defaultUrl: routes[i].controllers[0].methods[0].completePath, moduleName: routes[i].moduleName });
+        }
+    }
+
+    //添加自动生成的导航栏
+    let ul = document.getElementById("head_menu");
+
+    for (let i = 0; i < modules.length; i++) { 
+        var li = document.createElement("li");
+        li.className = "layui-nav-item";
+        //&quot;"+ row.name + "&quot;
+        //li.innerHTML = "<a href='#' onclick='jump(" + modules[i].moduleId + ")' >" + modules[i].moduleName + "</a>";
+        li.innerHTML = "<a href='#' onclick='jump(&quot;" + modules[i].moduleId + "&quot)' >" + modules[i].moduleName + "</a>";
+        ul.insertBefore(li, ul.childNodes[i]);
+    }
+
+    function jump(moduleId) {
+        console.log(moduleId);
+        for (let i = 0; i < modules.length; i++) {
+            if (moduleId === modules[i].moduleId) {
+                window.localStorage.setItem("current_moduleId", modules[i].moduleId);
+                window.location.replace(modules[i].defaultUrl);
+            }
+        }
+    }
+
+
+    var credentials_str = window.localStorage.getItem("credentials");
+    if (credentials_str != null) {
+        credentials = JSON.parse(credentials_str);
+        document.getElementById("header_account_name").innerHTML = credentials.userName;
+    }
+
+    function singout() {
+        axios.delete("/api/accountdata").then(function () {
+            window.localStorage.removeItem("credentials");
+            window.location.replace(window.location.href);
+        }).catch(function (error) {
+            console.log(error);
+        })
+    }
+</script>

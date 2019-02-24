@@ -1,0 +1,488 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<style>
+    .layui-layer-shade {
+        display: none;
+    }
+
+    .layui-select-title input {
+        width: 180px;
+    }
+
+    .top > div > .el-collapse-item__header {
+        background-color: #E4E7ED;
+        padding: 0 8px;
+    }
+
+    .middle > div > .el-collapse-item__header {
+        background-color: #EBEEF5;
+        padding: 0 8px;
+    }
+
+    .bottom > div > .el-collapse-item__header {
+        background-color: #F2F6FC;
+        padding: 0 8px;
+    }
+
+    .el-collapse-item__content {
+        padding-bottom: 0px
+    }
+
+
+    .HttpGet {
+        background: rgba(97,175,254,.1);
+    }
+
+        .HttpGet .MethoedType {
+            background: #61affe;
+        }
+
+    .HttpPost {
+        background: rgba(73,204,144,.1);
+    }
+
+        .HttpPost .MethoedType {
+            background: #49cc90;
+        }
+
+    .HttpPut {
+        background: rgba(252,161,48,.1);
+    }
+
+        .HttpPut .MethoedType {
+            background: #fca130;
+        }
+
+    .HttpDelete {
+        background: rgba(249,62,62,.1);
+    }
+
+        .HttpDelete .MethoedType {
+            background: #f93e3e;
+        }
+
+    .HttpTrace {
+    }
+
+        .HttpTrace .MethoedType {
+        }
+
+    .HttpHead {
+    }
+
+        .HttpHead .MethoedType {
+        }
+
+    .HttpOptions {
+    }
+
+        .HttpOptions .MethoedType {
+        }
+
+    .HttpConnect {
+    }
+
+        .HttpConnect .MethoedType {
+        }
+</style>
+
+<div id="app">
+
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="/demo/">系统管理</a>
+        <a><cite>模块 - 资源</cite></a>
+    </span>
+
+    <div class="layui-fluid layui-card" style="margin-top:20px;">
+        <div class="layui-row layui-col-space15">
+            <el-collapse v-for="module in modules" :key="module.id" :value="module.id">
+                <el-collapse-item class="top" :name="module.id" style="border: 1px solid #DCDFE6">
+                    <template slot="title">
+                        {{module.label}}(一级模块)
+                        <div style="margin-left:8px">
+                            <el-button type="primary" icon="el-icon-plus" circle size="mini" @@click="function(e){showGenerateLayer(module);e.cancelBubble = true;}"></el-button>
+                        </div>
+                    </template>
+                    <div class="layui-card-body">
+                        <fieldset class="layui-elem-field">
+                            <legend>区域</legend>
+                            <div class="layui-field-box">
+                                <div v-if="!module.areas||module.areas.length===0" style="padding:8px">无区域。</div>
+                                <el-collapse v-for="area in module.areas" :key="area.areaId" :value="area.areaId">
+                                    <el-collapse-item class="top" :name="area.areaId" style="border: 1px solid #DCDFE6">
+                                        <template slot="title">
+                                            {{area.areaPath}}({{area.areaAlias}})
+                                        </template>
+                                        <div v-if="!area.controllers||area.controllers.length===0" style="padding:8px">无控制器。</div>
+                                        <el-collapse v-for="ctrl in area.controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+                                            <el-collapse-item class="middle" :name="ctrl.controllerId">
+                                                <template slot="title">
+                                                    {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                                    <div style="margin-left:8px">
+                                                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){removeItem(area.controllers, ctrl);e.cancelBubble = true;}"></el-button>
+                                                    </div>
+                                                </template>
+                                                <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                                <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                                    <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                                    <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                                </div>
+                                            </el-collapse-item>
+                                        </el-collapse>
+                                    </el-collapse-item>
+                                </el-collapse>
+                            </div>
+                        </fieldset>
+                        <fieldset class="layui-elem-field" style="margin-top: 35px">
+                            <legend>控制器</legend>
+                            <div class="layui-field-box">
+                                <div v-if="!module.controllers||module.controllers.length===0" style="padding:8px">无控制器。</div>
+                                <el-collapse v-for="ctrl in module.controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+                                    <el-collapse-item class="middle" :name="ctrl.controllerId" style="border: 1px solid #DCDFE6;">
+                                        <template slot="title">
+                                            {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                            <div style="margin-left:8px">
+                                                <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){removeItem(module.controllers, ctrl);e.cancelBubble = true;}"></el-button>
+                                            </div>
+                                        </template>
+                                        <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                        <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                            <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                            <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                        </div>
+                                    </el-collapse-item>
+                                </el-collapse>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <el-collapse v-for="module2 in module.children" :key="module2.id" :value="module2.id">
+                        <el-collapse-item class="middle" :name="module2.id">
+                            <template slot="title">
+                                {{module2.label}}(二级模块)
+                                <div style="margin-left:8px">
+                                    <el-button type="primary" icon="el-icon-plus" circle size="mini" @@click="function(e){showGenerateLayer(module2);e.cancelBubble = true;}"></el-button>
+                                </div>
+                            </template>
+                            <div class="layui-card-body">
+                                <fieldset class="layui-elem-field">
+                                    <legend>区域</legend>
+                                    <div class="layui-field-box">
+                                        <div v-if="!module2.areas||module2.areas.length===0" style="padding:8px">无区域。</div>
+                                        <el-collapse v-for="area in module2.areas" :key="area.areaId" :value="area.areaId">
+                                            <el-collapse-item class="top" :name="area.areaId" style="border: 1px solid #DCDFE6">
+                                                <template slot="title">
+                                                    {{area.areaPath}}({{area.areaAlias}})
+                                                </template>
+                                                <div v-if="!area.controllers||area.controllers.length===0" style="padding:8px">无控制器。</div>
+                                                <el-collapse v-for="ctrl in area.controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+                                                    <el-collapse-item class="middle" :name="ctrl.controllerId">
+                                                        <template slot="title">
+                                                            {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                                            <div style="margin-left:8px">
+                                                                <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){removeItem(area.controllers, ctrl);e.cancelBubble = true;}"></el-button>
+                                                            </div>
+                                                        </template>
+                                                        <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                                        <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                                            <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                                            <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                                        </div>
+                                                    </el-collapse-item>
+                                                </el-collapse>
+                                            </el-collapse-item>
+                                        </el-collapse>
+                                    </div>
+                                </fieldset>
+                                <fieldset class="layui-elem-field" style="margin-top: 35px">
+                                    <legend>控制器</legend>
+                                    <div class="layui-field-box">
+                                        <div v-if="!module2.controllers||module2.controllers.length===0" style="padding:8px">无控制器。</div>
+                                        <el-collapse v-for="ctrl in module2.controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+                                            <el-collapse-item class="middle" :name="ctrl.controllerId" style="border: 1px solid #DCDFE6;">
+                                                <template slot="title">
+                                                    {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                                    <div style="margin-left:8px">
+                                                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){removeItem(module2.controllers, ctrl);e.cancelBubble = true;}"></el-button>
+                                                    </div>
+                                                </template>
+                                                <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                                <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                                    <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                                    <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                                </div>
+                                            </el-collapse-item>
+                                        </el-collapse>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <el-collapse v-for="module3 in module2.children" :key="module3.id" :value="module3.id">
+                                <el-collapse-item class="bottom" :name="module3.id">
+                                    <template slot="title">
+                                        {{module3.label}}(三级模块)
+                                        <div style="margin-left:8px">
+                                            <el-button type="primary" icon="el-icon-plus" circle size="mini" @@click="function(e){showGenerateLayer(module3);e.cancelBubble = true;}"></el-button>
+                                        </div>
+                                    </template>
+                                    <div class="layui-card-body">
+                                        <fieldset class="layui-elem-field">
+                                            <legend>区域</legend>
+                                            <div class="layui-field-box">
+                                                <div v-if="!module3.areas||module3.areas.length===0" style="padding:8px">无区域。</div>
+                                                <el-collapse v-for="area in module3.areas" :key="area.areaId" :value="area.areaId">
+                                                    <el-collapse-item class="top" :name="area.areaId" style="border: 1px solid #DCDFE6">
+                                                        <template slot="title">
+                                                            {{area.areaPath}}({{area.areaAlias}})
+                                                        </template>
+                                                        <div v-if="!area.controllers||area.controllers.length===0" style="padding:8px">无控制器。</div>
+                                                        <el-collapse v-for="ctrl in area.controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+                                                            <el-collapse-item class="middle" :name="ctrl.controllerId">
+                                                                <template slot="title">
+                                                                    {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                                                    <div style="margin-left:8px">
+                                                                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){removeItem(area.controllers, ctrl);e.cancelBubble = true;}"></el-button>
+                                                                    </div>
+                                                                </template>
+                                                                <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                                                <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                                                    <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                                                    <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                                                </div>
+                                                            </el-collapse-item>
+                                                        </el-collapse>
+                                                    </el-collapse-item>
+                                                </el-collapse>
+                                            </div>
+                                        </fieldset>
+                                        <fieldset class="layui-elem-field" style="margin-top: 35px">
+                                            <legend>控制器</legend>
+                                            <div class="layui-field-box">
+                                                <div v-if="!module3.controllers||module3.controllers.length===0" style="padding:8px">无控制器。</div>
+                                                <el-collapse v-for="ctrl in module3.controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+                                                    <el-collapse-item class="middle" :name="ctrl.controllerId" style="border: 1px solid #DCDFE6;">
+                                                        <template slot="title">
+                                                            {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                                            <div style="margin-left:8px">
+                                                                <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){removeItem(module3.controllers, ctrl);e.cancelBubble = true;}"></el-button>
+                                                            </div>
+                                                        </template>
+                                                        <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                                        <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                                            <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                                            <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                                        </div>
+                                                    </el-collapse-item>
+                                                </el-collapse>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </el-collapse-item>
+                            </el-collapse>
+                        </el-collapse-item>
+                    </el-collapse>
+                </el-collapse-item>
+            </el-collapse>
+        </div>
+        <div id="generate_layer" style="display:none; padding:40px;">
+            <fieldset class="layui-elem-field">
+                <legend>区域</legend>
+                <div class="layui-field-box">
+                    <div v-if="!unbindAreas||unbindAreas.length===0" style="padding:8px">无区域。</div>
+                    <el-collapse v-for="area in unbindAreas" :key="area.areaId" :value="area.areaId">
+                        <el-collapse-item class="top" :name="area.areaId" style="border: 1px solid #DCDFE6">
+                            <template slot="title">
+                                {{area.areaPath}}({{area.areaAlias}})
+                            </template>
+                            <div v-if="!area.controllers||area.controllers.length===0" style="padding:8px">无控制器。</div>
+                            <el-collapse v-for="ctrl in area.controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+                                <el-collapse-item class="middle" :name="ctrl.controllerId">
+                                    <template slot="title">
+                                        <el-checkbox v-model="ctrl.checked" border>{{ctrl.controllerPath}}({{ctrl.controllerAlias}})</el-checkbox>
+                                    </template>
+                                    <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                    <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                        <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                        <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                    </div>
+                                </el-collapse-item>
+                            </el-collapse>
+                        </el-collapse-item>
+                    </el-collapse>
+                </div>
+            </fieldset>
+            <fieldset class="layui-elem-field" style="margin-top: 35px">
+                <legend>控制器</legend>
+                <div class="layui-field-box">
+                    <div v-if="!unbindControllers||unbindControllers.length===0" style="padding:8px">无控制器。</div>
+                    <el-collapse v-for="ctrl in unbindControllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+                        <el-collapse-item class="middle" :name="ctrl.controllerId" style="border: 1px solid #DCDFE6;">
+                            <template slot="title">
+                                <el-checkbox v-model="ctrl.checked" border>{{ctrl.controllerPath}}({{ctrl.controllerAlias}})</el-checkbox>
+                            </template>
+                            <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                            <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                            </div>
+                        </el-collapse-item>
+                    </el-collapse>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    layui.use(['table', 'element', 'layer', 'form', 'laydate'], function () {
+        var layer = layui.layer;
+        var table = layui.table
+        var generateLayer_index = 0;
+        var layType = true;//true 新增  false 编辑
+        var user_id = 0;
+        var $ = layui.$, active = {};
+
+        var selectedModule = {}
+
+        new Vue({
+            el: '#app',
+            data: function () {
+                return {
+                    userGroups: [],
+                    users: [],
+                    data2: [{
+                        id: 1,
+                        label: 'Area1',
+                        children: [{
+                            id: 4,
+                            label: 'Ctrl1',
+                            children: [{
+                                id: 9,
+                                label: 'Method1【/api/SysModuleData/{id}】'
+                            }, {
+                                id: 10,
+                                label: 'Method2【/api/SysModuleData/{id}】'
+                            }]
+                        }]
+                    }, {
+                        id: 2,
+                        label: 'Area2',
+                        children: [{
+                            id: 5,
+                            label: 'Ctrl2'
+                        }, {
+                            id: 6,
+                            label: 'Ctrl22'
+                        }]
+                    }, {
+                        id: 3,
+                        label: 'Area2',
+                        children: [{
+                            id: 7,
+                            label: 'Ctrl22-1'
+                        }, {
+                            id: 8,
+                            label: 'Ctrl222'
+                        }]
+                    }],
+                    defaultProps: {
+                        children: 'children',
+                        label: 'label'
+                    },
+                    modules: [],
+                    unbindAreas: [],
+                    unbindControllers: [],
+                }
+            },
+            methods: {
+                fetchList: function () {
+                    var vm = this
+                    axios.get('/api/SysModuleRouteRelationData')
+                        .then(function (response) {
+                            vm.modules = response.data.content
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        })
+                },
+                showGenerateLayer: function (module) {
+                    var vm = this
+                    axios.get('/api/SysModuleRouteRelationData/NotBindRoute')
+                        .then(function (response) {
+                            vm.unbindAreas = response.data.content.areas
+                            vm.unbindControllers = response.data.content.controllers
+                            selectedModule = module
+                            generateLayer_index = layer.open({
+                                type: 1
+                                , title: "新增绑定 - " + module.label //不显示标题栏
+                                , closeBtn: false
+                                , shade: 0.8
+                                , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                                , area: ['900px', '500px']
+                                , content: $('#generate_layer') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                                , btn: ['添加绑定', '取消']
+                                , yes: function (index, layero) {
+                                    vm.addBinds()
+                                }
+                                , btn2: function (index, layero) {
+                                    vm.closeGenerateLayer()
+                                }
+                            });
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                closeGenerateLayer: function () {
+                    layer.close(generateLayer_index);
+                },
+                addBinds: function () {
+                    var vm = this
+                    var data = []
+                    vm.unbindAreas.forEach(function (area) {
+                        area.controllers.forEach(function (ctrl) {
+                            if (ctrl.checked)
+                                data.push({ moduleId: selectedModule.id, controllerId: ctrl.controllerId })
+                        })
+                    });
+                    vm.unbindControllers.forEach(function (ctrl) {
+                        if (ctrl.checked)
+                            data.push({ moduleId: selectedModule.id, controllerId: ctrl.controllerId })
+                    })
+                    axios.post('/api/SysModuleRouteRelationData/AddOrUpdate', data)
+                        .then(function (response) {
+                            vm.$notify({ title: '成功', message: '添加成功', type: 'success' })
+                            vm.closeGenerateLayer()
+                            vm.fetchList()
+                        })
+                        .catch(function (error) {
+                            vm.$notify({ title: '失败', message: '添加失败', type: 'error' })
+                            vm.fetchList()
+                            console.log(error);
+                        });
+                },
+                removeItem: function (list, ctrl) {
+                    var vm = this
+                    var relationId = ctrl.relationId
+                    list.splice(list.indexOf(ctrl), 1);
+                    axios.delete('/api/SysModuleRouteRelationData/' + relationId)
+                        .then(function (response) {
+                            vm.$notify({ title: '成功', message: '移除成功', type: 'success' })
+                        })
+                        .catch(function (error) {
+                            vm.$notify({ title: '失败', message: '移除失败', type: 'error' })
+                            vm.fetchList()
+                            console.log(error);
+                        });
+                }
+            },
+            mounted: function () {
+                var vm = this
+                vm.fetchList()
+            }
+        })
+    });
+
+</script>

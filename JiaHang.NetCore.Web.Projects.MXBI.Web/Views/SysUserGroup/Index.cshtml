@@ -1,0 +1,504 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<style>
+    .layui-layer-shade { display: none; }
+
+    /*.layui-select-title input { width: 180px; }*/
+</style>
+<div>
+
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="#">用户组</a>
+        <a><cite>组管理</cite></a>
+    </span>
+    <div class="layui-form" style="background-color:#F2F2F2;padding:30px 20px;margin-top:20px;">
+        <div class="layui-form-item">
+            用户组名称：
+            <div class="layui-inline">
+                <input class="layui-input" name="id" id="search_name" autocomplete="off">
+            </div>
+           
+            用户组级别：
+            <div class="layui-inline">
+                <select name="interest" id="search_level" lay-filter="aihao">
+                    <option value=""></option>
+                    <option value="1">一级用户组</option>
+                    <option value="2">二级用户组</option>
+                    <option value="3">三级用户组</option>
+                </select>
+            </div>
+
+        </div>
+        <div class="layui-form-item" style="margin-top:30px;">
+            <button class="layui-btn btn-search" data-type="search">条件查询</button>
+            <button class="layui-btn" data-type="showGenerateLayer">新增用户组</button>
+           
+            @*<button class="layui-btn" data-type="getCheckData">选中行删除</button>*@
+        </div>
+
+    </div>
+    <table class="layui-hide" id="test" lay-filter="sysuser"> </table>
+
+</div>
+<div id="generate_layer" style="display:none; padding:40px;">
+    <div class="layui-form layui-form-pane" action="" lay-filter="generate-form">
+
+        <div class="layui-form-item">
+
+            <label class="layui-form-label">用户组名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" id="name" autocomplete="off" placeholder="用户组名称" class="layui-input" lay-verify="required">
+            </div>
+
+
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户组等级</label>
+            <div class="layui-input-inline">
+                <input type="text" id="level" lay-verify="required" placeholder="用户组等级" autocomplete="off" class="layui-input" readonly value="一级用户组">
+            </div>
+            <div class="layui-form-mid layui-word-aux">当前用户组级别,若无父级用户组，可不选择</div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">一级用户组</label>
+            <div class="layui-input-block">
+                <select id="first_select" lay-filter="first-select">
+                    <option value="">若无所属用户组可不必选择</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">二级用户组</label>
+            <div class="layui-input-block">
+                <select id="second_select"  lay-filter="second-select">
+                    <option value="">不选择</option>                   
+                </select>
+            </div>
+        </div>
+
+
+
+
+        <div class="layui-form-item">
+            <button class="layui-btn" data-type="generate" id="generate_btn" lay-submit lay-filter="submit">立即创建</button>
+            <button class="layui-btn layui-layer-btn1" lay-filter="demo2" data-type="closeGenerateLayer">取消</button>
+        </div>
+    </div>
+
+
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script>
+    var usergroups = [];
+    layui.use(['table', 'element', 'layer', 'form', 'laydate'], function () {
+        var table = layui.table;
+        var element = layui.element;
+        var layer = layui.layer;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var generateLayer_index = 0;
+        var layType = true;//true 新增  false 编辑
+        var id = "";
+       
+
+        var level = "";
+
+
+
+        //日期
+        laydate.render({
+            elem: '#eff_start_date'
+        });
+        laydate.render({
+            elem: '#eff_end_date'
+        });
+
+
+        table.render({
+            elem: '#test'
+            , url: '/api/sysusergroupdata/search/'
+            , contentType: 'application/json'
+            , method: 'post'
+            , parseData: function (res) { //res 即为原始返回的数据
+                return {
+                    "status": res.isSuccess,
+                    "code": res.isSuccess == true ? 0 : 1, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": res.content.total, //解析数据长度
+                    "data": res.content.data //解析数据列表
+                };
+            }
+
+            , cols: [[
+                // { type: 'checkbox', fixed: 'left' }
+                 { field: 'name', title: '用户组名称' }
+                , { field: 'level', title: '当前用户组级别', sort: true }               
+                , { field: 'firstName', title: '所属一级用户组', sort: true }
+                , { field: 'secondName', title: '所属二级用户组', }
+                , { field: 'creation_Date', title: '创建时间', sort: true }
+                , { fixed: 'right', align: 'center', toolbar: '#barDemo', fixed: 'right' } //这里的toolbar值是模板元素的选择器
+            ]]
+            , id: 'testReload'
+            //, page: true
+            ,text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+
+
+        table.on('checkbox(sysuser)', function (obj) {
+           
+        });
+        //监听工具条
+        table.on('tool(sysuser)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                layer.msg('ID：' + data.id + ' 的查看操作');
+            } else if (obj.event === 'del') {
+             
+                let confirm_title = "确认删除[" + data.name + "]系统用户组的记录么?";
+                if (data.level!="三级用户组")
+                    confirm_title += "<Br/>" +"&nbsp;&nbsp;该用户组下的所有用户组也将被删除!"
+                layer.confirm(confirm_title, function (index) {
+                    layer.close(index);
+                    axios.delete('/api/sysusergroupdata/' + data.id)
+                        .then(function (response) {
+                            
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+                            //obj.del();
+                            window.location.reload();
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+
+                });
+            } else if (obj.event === 'edit') {                
+                id = data.id
+                layType = false;
+                showLayer(data);
+            }
+        });
+
+        var $ = layui.$, active = {
+            getCheckData: function () { //获取选中数据
+                var checkStatus = table.checkStatus('testReload')
+                    , data = checkStatus.data;
+
+
+                layer.confirm("确认删除" + data.length + "条记录么", function (index) {
+                    layer.close(index);
+
+                    let ids = [];
+                    let parms = "?";
+                    for (let i = 0; i < data.length; i++) {
+                        ids.push(data[i].id);
+                        parms += "ids=" + data[i].id + "&";
+                    }
+                    parms = parms.substring(0, parms.length - 1);
+                    //layer.alert(JSON.stringify(data));
+                    axios.delete("/api/sysmodule/batchdelete/" + parms)
+                        .then(function (response) {
+                            
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+
+                            //移除
+                            let tabledata = table.cache.testReload;
+                            
+                            tableReload(tabledata);
+
+
+                        })
+                        .catch(function (error) {
+                            layer.msg("发生了预料之外的错误!");
+                            console.log(error);
+                        });
+                });
+
+
+            },
+            search: function () {
+               
+                let pars = {
+                    limit: 10,
+                    page: 1,
+                    level: Number( $("#search_level").val()),
+                    name: $("#search_name").val(),   
+                }
+                //if ($("#search_user_ower").val() != "") {
+                //    pars.User_Ower = Number($("#search_user_ower").val());
+                //}
+                //if ($("#search_user_is_ldap").val() != "") {
+                //    pars.User_Is_Ldap = $("#search_user_is_ldap").val() == "1";
+                //}
+                //执行重载
+                
+                table.reload('testReload', {
+                    where: pars,
+                    contentType: 'application/json',
+                    method: 'post'
+                });
+            },
+            showGenerateLayer: function () {
+                
+                layType = true;
+                showLayer();
+            },
+            closeGenerateLayer: function () {
+                layer.close(generateLayer_index);
+            },
+
+        };
+        form.on('submit(submit)', function () {
+            //获取父级id
+            var parentid = $("#first_select").val();
+           
+            if (parentid != "") {
+                var secondid = $("#second_select").val();
+                if (secondid != "") {
+                    parentid = secondid;
+                }
+            }
+
+          
+            let model = {
+                name: $("#name").val(),
+                parentid: parentid
+            };
+
+           
+            let url = "/api/sysusergroupdata";
+            let method = "POST";
+            if (layType != true) {
+                url = "/api/sysusergroupdata/" + id;
+                method = "PUT";
+            }
+            axios({ url: url, method: method, data: model })
+                .then(function (response) {
+                    
+                    layer.msg(response.data.message);
+                    if (!response.data.isSuccess) {
+                        return;
+                    }
+                    let datatable = table.cache.testReload;
+                 
+                    if (layType != true) {
+                        //修改
+                        for (let i = 0; i < datatable.length; i++) {
+                            if (datatable[i].id == response.data.content.id) {
+                                datatable.splice(i, 1, response.data.content);
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        //新增
+                        datatable.unshift(response.content)
+
+                    }
+                   // tableReload(datatable)
+                    window.location.reload();
+                    layer.close(generateLayer_index);
+                })
+                .catch(function (error) {
+
+                    layer.msg("发生了预料之外的错误!");
+                    console.log(error);
+                });
+
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        })
+        form.on('select(first-select)', function (data) {
+           
+            initSecondSelect(data.value, "");
+            console.log(data.value);
+            if (data.value == "") {
+                $("#second_select").attr("disabled", "disabled");
+                $("#level").val( "一级用户组");
+                return;
+            }
+            //$("#level").attr('disabled', true);
+            $("#level").val("二级用户组");
+            $("#second_select").removeAttr("disabled");
+           
+        })
+
+        form.on('select(second-select)', function (data) {
+            if (data.value == "") {
+                $("#level").val("二级用户组");
+                return;
+            }
+            $("#level").val("三级用户组");
+        })
+
+            $('.layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+
+        init();
+        function init() {
+            getUserGroups();
+
+        }
+
+        function getUserGroups() {
+         
+            axios.get('/api/sysusergroupdata/acquisitionmodule')
+                .then(function (response) {
+                   
+                    usergroups = response.data;
+               
+                    if (response.data.length == 0) return;
+                    //for (let i = 0;i<res)
+                    //$('#first_select').append(new Option(res.xm, item.id));
+                    initFirstSelect("");
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+
+        };
+
+        function initFirstSelect(id) {
+            console.log("init_select:"+id);
+            $("#first_select").html("");
+            $('#first_select').append(new Option("不选择", ""));
+            if (usergroups.length == 0) {               
+                form.render('select');
+                return;
+            }
+            for (let i = 0; i < usergroups.length; i++) {
+                $('#first_select').append(new Option(usergroups[i].name, usergroups[i].id));
+            }
+            if (id != null && id != "") { 
+
+                $("select[name='result']").val(11);
+                var select = 'dd[lay-value=' + id + ']';
+                $('#first_select').siblings("div.layui-form-select").find('dl').find(select).click();
+            }
+  
+            form.render('select');
+        }
+        function initSecondSelect(id, secondid) {
+            console.log("init_second_select:" + id);
+            let childs_module = [];
+            for (let i = 0; i < usergroups.length; i++) {
+                if (usergroups[i].id == id) {
+                    childs_module = usergroups[i].listChilds;
+                    break;
+                }
+            }
+            console.log(childs_module);
+           
+            $("#second_select").html("");
+            $('#second_select').append(new Option("不选择", ""));
+            if (childs_module.length == 0) { 
+                form.render('select');
+                return;
+            }
+            
+            $('#second_select').append(new Option("", ""));
+            for (let j = 0; j < childs_module.length; j++) {
+                $('#second_select').append(new Option(childs_module[j].name, childs_module[j].id));
+            }
+          
+            if (secondid != null && secondid != "") { 
+                var select = 'dd[lay-value=' + secondid + ']';
+                console.log(select);
+                $('#second_select').siblings("div.layui-form-select").find('dl').find(select).click();
+            }
+            //form.render('select', 'second-module');
+            form.render('select');
+        }
+       
+
+        function showLayer(data) {
+
+            console.log(data);
+                initFormValue(data);
+                let title = "新增系统用户组";
+                //document.getElementById("user_account").disabled = false;
+                document.getElementById("generate_btn").innerHTML = "立即创建";
+                if (layType != true) {
+                    title = "编辑系统用户组";
+                    //document.getElementById("user_account").disabled = true;
+                    document.getElementById("generate_btn").innerHTML = "立即修改";
+                }
+                generateLayer_index = layer.open({
+                    type: 1
+                    , title: title //不显示标题栏
+                    , closeBtn: false
+                    , area: ['1100px', '600px']
+                    , shade: 0.8
+                    , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                    //, btn: ['火速围观', '残忍拒绝']
+                    , btnAlign: 'c'
+                    , moveType: 1 //拖拽模式，0或者1
+                    , content: $('#generate_layer') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+
+                });
+            };
+        function initFormValue(data) {
+            $("#first_select").removeAttr("disabled");
+            $("#second_select").removeAttr("disabled");
+            if (data == undefined) {
+
+                form.val("generate-form", {
+                    name:"",
+                    firstid: "",
+                    secondid: ""
+                })
+                return;
+            }
+            
+            form.val("generate-form", {
+                name: data.name,
+                firstId: data.firstId,
+                secondId: data.secondId
+            });
+          
+            $("#level").val(data.level);
+           
+            
+            form.render('select');
+            initFirstSelect(data.firstId);
+            initSecondSelect(data.firstId, data.secondId);
+            if (data.level == "一级用户组") {
+                $("#first_select").attr("disabled", "disabled");
+                $("#second_select").attr("disabled", "disabled");
+            }
+            if (data.level == "二级用户组") {
+                $("#second_select").attr("disabled", "disabled");
+            }
+            form.render('select');
+            
+        }
+        function tableReload(datatable) {
+           
+            table.reload("testReload", {
+                data: datatable
+            })
+        }
+
+    });
+
+
+
+</script>
+

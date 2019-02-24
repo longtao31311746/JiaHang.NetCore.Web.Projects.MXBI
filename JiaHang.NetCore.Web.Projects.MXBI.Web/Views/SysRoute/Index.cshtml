@@ -1,0 +1,701 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<style>
+    .layui-layer-shade {
+        display: none;
+    }
+
+    .layui-select-title input {
+        width: 180px;
+    }
+
+
+    .top {
+        border: 1px solid #DCDFE6;
+    }
+
+    .top > div > .el-collapse-item__header {
+        background-color: #E4E7ED;
+        padding: 0 8px;
+    }
+
+    .middle > div > .el-collapse-item__header {
+        background-color: #EBEEF5;
+        padding: 0 8px;
+    }
+    
+    .HttpGet {
+        background: rgba(97,175,254,.1);
+    }
+
+        .HttpGet .MethoedType {
+            background: #61affe;
+        }
+
+    .HttpPost {
+        background: rgba(73,204,144,.1);
+    }
+
+        .HttpPost .MethoedType {
+            background: #49cc90;
+        }
+
+    .HttpPut {
+        background: rgba(252,161,48,.1);
+    }
+
+        .HttpPut .MethoedType {
+            background: #fca130;
+        }
+
+    .HttpDelete {
+        background: rgba(249,62,62,.1);
+    }
+
+        .HttpDelete .MethoedType {
+            background: #f93e3e;
+        }
+
+    .HttpTrace {
+    }
+
+        .HttpTrace .MethoedType {
+        }
+
+    .HttpHead {
+    }
+
+        .HttpHead .MethoedType {
+        }
+
+    .HttpOptions {
+    }
+
+        .HttpOptions .MethoedType {
+        }
+
+    .HttpConnect {
+    }
+
+        .HttpConnect .MethoedType {
+        }
+
+</style>
+
+<div id="app">
+
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="/demo/">系统管理</a>
+        <a><cite>系统资源</cite></a>
+    </span>
+
+    <div class="layui-tab layui-tab-brief" style=" background-color: #ffffff;">
+        <ul class="layui-tab-title">
+            <li class="layui-this">视图资源</li>
+            <li>API资源</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div style="margin-bottom:8px">
+                    <button class="layui-btn" @@click="showAreaForm()">新增区域</button>
+                    <button class="layui-btn" @@click="showControllerForm()">新增控制器</button>
+                </div>
+
+                <fieldset class="layui-elem-field">
+                    <legend>区域</legend>
+                    <div class="layui-field-box">
+                        <div v-if="!viewRoute_areas||viewRoute_areas.length===0" style="padding:8px">无区域。</div>
+                        <el-collapse v-for="area in viewRoute_areas" :key="area.areaId" :value="area.areaId">
+
+                            <el-collapse-item class="first" :name="area.areaId" style="border: 1px solid #DCDFE6">
+
+                                <template slot="title">
+                                    {{area.areaPath}}({{area.areaAlias}})
+                                    <div style="margin-left:8px">
+                                        <el-button type="primary" icon="el-icon-plus" circle size="mini" @@click="function(e){showControllerForm(null, area);e.cancelBubble = true;}"></el-button>
+                                        <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showAreaForm(area);e.cancelBubble = true;}"></el-button>
+                                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delArea(area);e.cancelBubble = true;}"></el-button>
+                                    </div>
+                                </template>
+                                <div v-if="!area.controllers||area.controllers.length===0" style="padding:8px">无控制器。</div>
+                                <el-collapse v-for="ctrl in area.controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+
+                                    <el-collapse-item class="second" :name="ctrl.controllerId">
+
+ 
+                                        <template slot="title">
+                                            {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                            <div style="margin-left:8px">
+                                                <el-button type="primary" icon="el-icon-plus" circle size="mini" @@click="function(e){showMethodForm(null, ctrl, area);e.cancelBubble = true;}"></el-button>
+                                                <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showControllerForm(ctrl, area);e.cancelBubble = true;}"></el-button>
+                                                <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delCtrl(ctrl);e.cancelBubble = true;}"></el-button>
+                                            </div>
+                                        </template>
+
+                                        <div-methods :methods="ctrl.methods" :controller="ctrl" :area="area" @@edit="showMethodForm" @@delete="delMethod"></div-methods>
+                                        @*<div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+
+                                        <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+
+                                        <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                            <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                            <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                            <span style="margin-left:8px">
+                                                <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showMethodForm(method, ctrl, area);e.cancelBubble = true;}"></el-button>
+                                                <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delMethod(method);e.cancelBubble = true;}"></el-button>
+                                            </span>
+
+                                        </div>*@
+
+                                    </el-collapse-item>
+                                </el-collapse>
+                            </el-collapse-item>
+                        </el-collapse>
+                    </div>
+                </fieldset>
+
+                <fieldset class="layui-elem-field" style="margin-top: 35px">
+                    <legend>控制器</legend>
+                    <div class="layui-field-box">
+                        <div v-if="!viewRoute_controllers||viewRoute_controllers.length===0" style="padding:8px">无控制器。</div>
+                        <el-collapse v-for="ctrl in viewRoute_controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+
+                            <el-collapse-item class="second" :name="ctrl.controllerId" style="border: 1px solid #DCDFE6;">
+                                <template slot="title">
+                                    {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                    <div style="margin-left:8px">
+                                        <el-button type="primary" icon="el-icon-plus" circle size="mini" @@click="function(e){showMethodForm(null, ctrl, null);e.cancelBubble = true;}"></el-button>
+                                        <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showControllerForm(ctrl, null);e.cancelBubble = true;}"></el-button>
+
+
+                                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delCtrl(ctrl);e.cancelBubble = true;}"></el-button>
+                                    </div>
+                                </template>
+                                <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                    <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                    <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                    <span style="margin-left:8px">
+
+                                        <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showMethodForm(method, ctrl, null);e.cancelBubble = true;}"></el-button>
+
+
+                                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delMethod(method);e.cancelBubble = true;}"></el-button>
+                                    </span>
+                                </div>
+                            </el-collapse-item>
+                        </el-collapse>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="layui-tab-item">
+                <div style="margin-bottom:8px">
+                    <button class="layui-btn" @@click="showAreaForm()">新增区域</button>
+                    <button class="layui-btn" @@click="showControllerForm()">新增控制器</button>
+                </div>
+
+                <fieldset class="layui-elem-field">
+                    <legend>区域</legend>
+                    <div class="layui-field-box">
+                        <div v-if="!apiRoute_areas||apiRoute_areas.length===0" style="padding:8px">无区域。</div>
+                        <el-collapse v-for="area in apiRoute_areas" :key="area.areaId" :value="area.areaId">
+
+                            <el-collapse-item class="first" :name="area.areaId">
+
+
+                                <template slot="title">
+                                    {{area.areaPath}}({{area.areaAlias}})
+                                    <div style="margin-left:8px">
+                                        <el-button type="primary" icon="el-icon-plus" circle size="mini" @@click="function(e){showControllerForm(null, area);e.cancelBubble = true;}"></el-button>
+                                        <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showAreaForm(area);e.cancelBubble = true;}"></el-button>
+                                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delArea(area);e.cancelBubble = true;}"></el-button>
+                                    </div>
+                                </template>
+                                <div v-if="!area.controllers||area.controllers.length===0" style="padding:8px">无控制器。</div>
+                                <el-collapse v-for="ctrl in area.controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+
+                                    <el-collapse-item class="second" :name="ctrl.controllerId">
+
+                                        <template slot="title">
+                                            {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                            <div style="margin-left:8px">
+                                                <el-button type="primary" icon="el-icon-plus" circle size="mini" @@click="function(e){showMethodForm(null, ctrl, area);e.cancelBubble = true;}"></el-button>
+                                                <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showControllerForm(ctrl, area);e.cancelBubble = true;}"></el-button>
+                                                <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delCtrl(ctrl);e.cancelBubble = true;}"></el-button>
+                                            </div>
+                                        </template>
+                                        <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                        <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                            <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                            <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                            <span style="margin-left:8px">
+                                                <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showMethodForm(method, ctrl, area);e.cancelBubble = true;}"></el-button>
+                                                <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delMethod(method);e.cancelBubble = true;}"></el-button>
+                                            </span>
+                                        </div>
+                                    </el-collapse-item>
+                                </el-collapse>
+                            </el-collapse-item>
+                        </el-collapse>
+                    </div>
+                </fieldset>
+
+                <fieldset class="layui-elem-field" style="margin-top:35px">
+                    <legend>控制器</legend>
+                    <div class="layui-field-box">
+                        <div v-if="!apiRoute_controllers||apiRoute_controllers.length===0" style="padding:8px">无控制器。</div>
+                        <el-collapse v-for="ctrl in apiRoute_controllers" :key="ctrl.controllerId" :value="ctrl.controllerId">
+
+                            <el-collapse-item class="second" :name="ctrl.controllerId" style="border: 1px solid #DCDFE6;">
+                                <template slot="title">
+                                    {{ctrl.controllerPath}}({{ctrl.controllerAlias}})
+                                    <div style="margin-left:8px">
+                                        <el-button type="primary" icon="el-icon-plus" circle size="mini" @@click="function(e){showMethodForm(null, ctrl, null);e.cancelBubble = true;}"></el-button>
+                                        <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showControllerForm(ctrl, null);e.cancelBubble = true;}"></el-button>
+
+
+                                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delCtrl(ctrl);e.cancelBubble = true;}"></el-button>
+                                    </div>
+                                </template>
+                                <div v-if="!ctrl.methods||ctrl.methods.length===0" style="padding:8px">无方法。</div>
+                                <div v-for="method in ctrl.methods" :key="method.methodId" :class="method.methodType" style="padding:8px">
+                                    <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>
+                                    <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>
+                                    <span style="margin-left:8px">
+
+                                        <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){showMethodForm(method, ctrl, null);e.cancelBubble = true;}"></el-button>
+
+                                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){delMethod(method);e.cancelBubble = true;}"></el-button>
+                                    </span>
+                                </div>
+                            </el-collapse-item>
+                        </el-collapse>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+    <div id="area_layer" style="padding:40px;display: none">
+        <el-form :model="areaForm" :rules="areaRules" ref="areaForm" label-width="100px">
+            <el-form-item label="区域路径" prop="areaPath">
+                <el-input v-model="areaForm.areaPath"></el-input>
+            </el-form-item>
+            <el-form-item label="区域别名">
+                <el-input v-model="areaForm.areaAlias"></el-input>
+            </el-form-item>
+        </el-form>
+    </div>
+    <div id="ctrl_layer" style="padding:40px;display: none">
+        <el-form :model="ctrlForm" :rules="ctrlRules" ref="ctrlForm" label-width="100px">
+            <el-form-item label="区域路径">
+                <el-input v-model="ctrlForm.areaPath" placeholder="无" readonly></el-input>
+            </el-form-item>
+            <el-form-item label="区域别名">
+                <el-input v-model="ctrlForm.areaAlias" placeholder="无" readonly></el-input>
+            </el-form-item>
+            <el-form-item label="控制器路径" prop="controllerPath">
+                <el-input v-model="ctrlForm.controllerPath"></el-input>
+            </el-form-item>
+            <el-form-item label="控制器别名">
+                <el-input v-model="ctrlForm.controllerAlias"></el-input>
+            </el-form-item>
+            <el-form-item label="是否API">
+                <el-switch v-model="ctrlForm.isApi"></el-switch>
+            </el-form-item>
+        </el-form>
+    </div>
+    <div id="method_layer" style="padding:40px;display: none">
+        <el-form :model="methodForm" :rules="methodRules" ref="methodForm" label-width="100px">
+            <el-form-item label="区域路径">
+                <el-input v-model="methodForm.areaPath" placeholder="无" readonly></el-input>
+            </el-form-item>
+            <el-form-item label="区域别名">
+                <el-input v-model="methodForm.areaAlias" placeholder="无" readonly></el-input>
+            </el-form-item>
+            <el-form-item label="控制器路径">
+                <el-input v-model="methodForm.controllerPath" readonly></el-input>
+            </el-form-item>
+            <el-form-item label="控制器别名">
+                <el-input v-model="methodForm.controllerAlias" readonly></el-input>
+            </el-form-item>
+            <el-form-item label="方法路径" prop="methodPath">
+                <el-input v-model="methodForm.methodPath"></el-input>
+            </el-form-item>
+            <el-form-item label="方法别名">
+                <el-input v-model="methodForm.methodAlias"></el-input>
+            </el-form-item>
+            <el-form-item label="方法类型">
+                <el-select v-model="methodForm.methodType" placeholder="请选择方法类型">
+                    <el-option label="HttpGet" value="HttpGet"></el-option>
+                    <el-option label="HttpPost" value="HttpPost"></el-option>
+                    <el-option label="HttpPut" value="HttpPut"></el-option>
+                    <el-option label="HttpDelete" value="HttpDelete"></el-option>
+                    <el-option label="HttpTrace" value="HttpTrace"></el-option>
+                    <el-option label="HttpHead" value="HttpHead"></el-option>
+                    <el-option label="HttpOptions" value="HttpOptions"></el-option>
+                    <el-option label="HttpConnect" value="HttpConnect"></el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+    </div>
+</div>
+
+<script>
+    Vue.component('div-methods', {
+        template:
+            '<div>\
+                <div v-if="!m_methods||m_methods.length===0" style="padding:8px">无方法。</div>\
+                <div v-for="method in m_methods" :key="method.methodId" :class="method.methodType" style="padding:8px">\
+                    <el-tag class="MethoedType" style="color:white">{{method.methodType}}</el-tag>\
+                    <span style="margin-left:8px">{{method.completePath}}({{method.methodAlias}})</span>\
+                    <span style="margin-left:8px">\
+                        <el-button type="warning" icon="el-icon-edit" circle size="mini" @@click="function(e){$emit(\'edit\',method, controller, area);e.cancelBubble = true;}"></el-button>\
+                        <el-button type="danger" icon="el-icon-delete" circle size="mini" @@click="function(e){$emit(\'delete\', method);e.cancelBubble = true;}"></el-button>\
+                    </span>\
+                </div>\
+            </div>',
+        props: {
+            methods: {
+                type: Array,
+                default: function () {
+                    return []
+                }
+            },
+            controller: {
+                default: {}
+            },
+            area: {
+                default: {}
+            },
+        },
+        data: function () {
+            return {
+                m_methods: this.methods,
+            }
+        }
+    })
+
+</script>
+
+
+
+<script>
+    layui.use(['element', 'layer', 'form'], function () {
+        var layer = layui.layer
+        var element = layui.element
+        var form = layui.form;
+
+        var $ = layui.$
+
+        var generateLayer_index = 0
+        var selectedGroupID = ""
+
+        new Vue({
+            el: '#app',
+            data: function () {
+                return {
+                    areaForm: {
+                        "id": "",
+                        "areaAlias": "",
+                        "areaPath": ""
+                    },
+                    areaRules: {
+                        areaPath: [{ required: true, message: '请输入区域路径', trigger: 'blur' },],
+                    },
+                    ctrlForm: {
+                        "id": "",
+                        "areaId": "",
+                        "isApi": false,
+                        "controllerAlias": "",
+                        "controllerPath": "",
+                        areaPath: '',
+                        areaAlias: ''
+                    },
+                    ctrlRules: {
+                        controllerPath: [{ required: true, message: '请输入控制器路径', trigger: 'blur' },],
+                    },
+                    methodForm: {
+                        "id": "",
+                        "controllerId": "",
+                        "methodAlias": "",
+                        "methodPath": "",
+                        "methodType": "HttpGet",
+                        "controllerAlias": "",
+                        "controllerPath": "",
+                        areaPath: '',
+                        areaAlias: ''
+                    },
+                    methodRules: {
+                        methodPath: [{ required: true, message: '请输入方法路径', trigger: 'blur' },],
+                    },
+                    apiRoute_areas: [],
+                    apiRoute_controllers: [],
+                    viewRoute_areas: [],
+                    viewRoute_controllers: [],
+                }
+            },
+            methods: {
+                fetchList: function () {
+                    var vm = this
+                    axios.get('/api/SysRouteData')
+                        .then(function (response) {
+                            vm.apiRoute_areas = response.data.content.apiRoute.areas
+                            vm.apiRoute_controllers = response.data.content.apiRoute.controllers
+                            vm.viewRoute_areas = response.data.content.viewRoute.areas
+                            vm.viewRoute_controllers = response.data.content.viewRoute.controllers
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        })
+                },
+
+                // 弹出窗
+                showAreaForm: function (area) {
+                    var vm = this
+                    var isNew = !area
+                    if (isNew) {
+                        for (var key in vm.areaForm) {
+                            vm.areaForm[key] = ''
+                        }
+                    }
+                    else {
+                        vm.areaForm = Object.assign({}, area)
+                        vm.areaForm.id = area.areaId
+                    }
+
+                    generateLayer_index = layer.open({
+                        type: 1
+                        , title: isNew ? "新增区域" : "编辑区域" //不显示标题栏
+                        , closeBtn: false
+                        , shade: 0.8
+                        , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                        , content: $('#area_layer') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                        , btn: ['保存', '取消']
+                        , yes: function (index, layero) {
+                            vm.$refs['areaForm'].validate((valid) => {
+                                if (!valid) return
+
+                                if (!vm.areaForm.areaAlias)
+                                    vm.areaForm.areaAlias = vm.areaForm.areaPath
+
+                                axios.post('/api/SysRouteData/AddOrUpdateArea', vm.areaForm)
+                                    .then(function (response) {
+                                        if (response.data.isSuccess) {
+                                            vm.$notify({ title: '成功', message: response.data.message, type: 'success' })
+                                            vm.closeGenerateLayer()
+                                            vm.fetchList()
+                                        }
+                                        else {
+                                            vm.$notify({ title: '失败', message: response.data.message, type: 'error' })
+                                        }
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error);
+                                        vm.$notify({ title: '异常', message: error, type: 'error' })
+                                    });
+                            });
+                        }
+                        , btn2: function (index, layero) {
+                            vm.closeGenerateLayer()
+                        }
+                    });
+                },
+                showControllerForm: function (ctrl, area) {
+                    var vm = this
+                    var isNew = !ctrl
+                    if (isNew) {
+                        for (var key in vm.ctrlForm) {
+                            vm.ctrlForm[key] = ''
+                        }
+                        vm.ctrlForm.isApi = false
+                        if (!!area) {
+                            vm.ctrlForm.areaId = area.areaId
+                            vm.ctrlForm.areaPath = area.areaPath
+                            vm.ctrlForm.areaAlias = area.areaAlias
+                        }
+                    }
+                    else {
+                        vm.ctrlForm = Object.assign({}, area, ctrl)
+                        vm.ctrlForm.id = ctrl.controllerId
+
+                        if (!!area)
+                            vm.ctrlForm.areaId = area.areaId
+
+
+                    }
+
+                    generateLayer_index = layer.open({
+                        type: 1
+                        , title: isNew ? "新增控制器" : "编辑控制器" //不显示标题栏
+                        , closeBtn: false
+                        , shade: 0.8
+                        , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                        , content: $('#ctrl_layer') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                        , btn: ['保存', '取消']
+                        , yes: function (index, layero) {
+                            vm.$refs['ctrlForm'].validate((valid) => {
+                                if (!valid) return
+
+                                if (!vm.ctrlForm.controllerAlias)
+                                    vm.ctrlForm.controllerAlias = vm.ctrlForm.controllerPath
+
+                                axios.post('/api/SysRouteData/AddOrUpdateController', vm.ctrlForm)
+                                    .then(function (response) {
+                                        if (response.data.isSuccess) {
+                                            vm.$notify({ title: '成功', message: response.data.message, type: 'success' })
+                                            vm.closeGenerateLayer()
+                                            vm.fetchList()
+                                        }
+                                        else {
+                                            vm.$notify({ title: '失败', message: response.data.message, type: 'error' })
+                                        }
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error);
+                                        vm.$notify({ title: '异常', message: error, type: 'error' })
+                                    });
+                            });
+                        }
+                        , btn2: function (index, layero) {
+                            vm.closeGenerateLayer()
+                        }
+                    });
+                },
+                showMethodForm: function (method, ctrl, area) {
+                    var vm = this
+                    var isNew = !method
+                    if (isNew) {
+                        for (var key in vm.methodForm) {
+                            vm.methodForm[key] = ''
+                        }
+                        vm.methodForm.methodType = "HttpGet"
+                        vm.methodForm.controllerPath = ctrl.controllerPath
+                        vm.methodForm.controllerAlias = ctrl.controllerAlias
+                        if (!!area) {
+                            vm.methodForm.areaPath = area.areaPath
+                            vm.methodForm.areaAlias = area.areaAlias
+                        }
+                    }
+                    else {
+                        vm.methodForm = Object.assign({}, area, ctrl, method)
+                        vm.methodForm.id = method.methodId
+                    }
+                    vm.methodForm.controllerId = ctrl.controllerId
+
+                    generateLayer_index = layer.open({
+                        type: 1
+                        , title: isNew ? "新增方法" : "编辑方法" //不显示标题栏
+                        , closeBtn: false
+                        , shade: 0.8
+                        , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                        , content: $('#method_layer') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                        , btn: ['保存', '取消']
+                        , yes: function (index, layero) {
+                            vm.$refs['methodForm'].validate((valid) => {
+                                if (!valid) return
+
+                                if (!vm.methodForm.methodAlias)
+                                    vm.methodForm.methodAlias = vm.methodForm.methodPath
+
+                                axios.post('/api/SysRouteData/AddOrUpdateMethod', vm.methodForm)
+                                    .then(function (response) {
+                                        if (response.data.isSuccess) {
+                                            vm.$notify({ title: '成功', message: response.data.message, type: 'success' })
+                                            vm.closeGenerateLayer()
+                                            vm.fetchList()
+                                        }
+                                        else {
+                                            vm.$notify({ title: '失败', message: response.data.message, type: 'error' })
+                                        }
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error);
+                                        vm.$notify({ title: '异常', message: error, type: 'error' })
+                                    });
+                            });
+                        }
+                        , btn2: function (index, layero) {
+                            vm.closeGenerateLayer()
+                        }
+                    });
+                },
+
+                // 删除
+                delArea: function (area) {
+                    var vm = this
+                    vm.$confirm('此操作将永久删除该区域, 是否继续?', '提示', { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' })
+                        .then(function () {
+                            axios.delete('/api/SysRouteData/DeleteAreaRoute/' + area.areaId)
+                                .then(function (response) {
+                                    if (response.data.isSuccess) {
+                                        vm.$notify({ title: '成功', message: response.data.message, type: 'success' })
+                                        vm.fetchList()
+                                    }
+                                    else {
+                                        vm.$notify({ title: '失败', message: response.data.message, type: 'error' })
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.log(error);
+                                    vm.$notify({ title: '异常', message: error, type: 'error' })
+                                });
+                        })
+                },
+                delCtrl: function (ctrl) {
+                    var vm = this
+                    vm.$confirm('此操作将永久删除该控制器, 是否继续?', '提示', { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' })
+                        .then(function () {
+                            axios.delete('/api/SysRouteData/DeleteControllerRoute/' + ctrl.controllerId)
+                                .then(function (response) {
+                                    if (response.data.isSuccess) {
+                                        vm.$notify({ title: '成功', message: response.data.message, type: 'success' })
+                                        vm.fetchList()
+                                    }
+                                    else {
+                                        vm.$notify({ title: '失败', message: response.data.message, type: 'error' })
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.log(error);
+                                    vm.$notify({ title: '异常', message: error, type: 'error' })
+                                });
+                        })
+                },
+                delMethod: function (method) {
+                    var vm = this
+                    vm.$confirm('此操作将永久删除该方法, 是否继续?', '提示', { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' })
+                        .then(function () {
+                            axios.delete('/api/SysRouteData/DeleteMethodRoute/' + method.methodId)
+                                .then(function (response) {
+                                    if (response.data.isSuccess) {
+                                        vm.$notify({ title: '成功', message: response.data.message, type: 'success' })
+                                        vm.fetchList()
+                                    }
+                                    else {
+                                        vm.$notify({ title: '失败', message: response.data.message, type: 'error' })
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.log(error);
+                                    vm.$notify({ title: '异常', message: error, type: 'error' })
+                                });
+                        })
+                },
+
+                closeGenerateLayer: function () {
+                    layer.close(generateLayer_index);
+                },
+            },
+            mounted: function () {
+                element.render('collapse');
+                var vm = this
+                vm.fetchList()
+            }
+        })
+    });
+
+</script>

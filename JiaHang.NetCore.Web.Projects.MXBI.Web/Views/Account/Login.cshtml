@@ -1,0 +1,134 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+<link href="https://at.alicdn.com/t/font_1018241_zxgexn67aas.css" rel="stylesheet" />
+
+<link href="~/layui/css/layui.css" rel="stylesheet" />
+<style>
+    #login_view { background-image: url("../../images/login/mx_login_bg1920.jpg"); background-repeat: no-repeat; background-size: cover; -webkit-background-size: cover; -o-background-size: cover; background-position: center 0; height: 100%; width: 100%; position: fixed; min-width: 1000px; top: 0px; left: 0px; /*z-index: -10;*/ }
+
+    .login-top { min-height: 150px; width: 100%; margin-top: 12%; }
+    /*.app-logo { background-image: url("../../images/login/mx_logo.jpg"); background-repeat: no-repeat; margin: 0 auto; width: 10%; height: 80px; }*/
+
+    /*.app-name { background-image: url("../../images/login/mx_login_title.png"); background-repeat: no-repeat; margin: 0 auto; width: 40%; height: 80px; min-height: 80px; margin-top: 20px; }*/
+
+    .login-content { width: 400px; min-width: 400px; margin: 0 auto;margin-top:20px; background: transparent; background-color: rgba(255,255,255,0.15); border-radius: 10px; }
+
+
+    .login-form { margin: 0 auto; padding: 30px 5%; width: 80%; }
+
+    .from-text { margin-top: 20px; margin-bottom: 20px; color: #D8DCDF; }
+
+    .login-form input { width: 100%; height: 40px; background: transparent; background-color: #727D83; border: none; border-radius: 5px; text-indent: 10px; color: #D8DCDF; }
+    ::-webkit-input-placeholder { /* WebKit, Blink, Edge */ color: #D8DCDF; }
+
+    :-moz-placeholder { /* Mozilla Firefox 4 to 18 */ color: #D8DCDF; }
+
+    ::-moz-placeholder { /* Mozilla Firefox 19+ */ color: #D8DCDF; }
+
+    :-ms-input-placeholder { /* Internet Explorer 10-11 */ color: #D8DCDF; }
+    .login-btn input { background-color: #E41B25; font-size: 20px; }
+</style>
+
+<div id="login_view">
+    <div class="login-top" style="text-align:center;">
+        <div class="app-logo">
+            <img src="../../images/login/mx_logo.jpg"/>
+        </div>
+
+        <div class="app-name" style="margin-top:20px;">
+
+            <img src="../../images/login/mx_login_title.png" />
+        </div>
+    </div>
+    <div class="login-content">
+        <div class="login-form">
+            <div class="from-text">
+                <input type="text" id="user_account" placeholder="请输入账号" />
+            </div>
+            <div class="from-text">
+                <input type="password" id="password" placeholder="请输入密码" />
+
+            </div>
+            <div class="from-text" id="remember">             
+                <i class="iconfont icon-checkboxoutline" id="checked" style="display:none;font-size:18px;"></i>  <i class="iconfont icon-checkboxoutlineblank" id="unchecked" style="font-size:18px;"></i>  <label>记住密码</label>
+            </div>
+            <div class="from-text login-btn">
+                <input type="button" id="btn_login"  value="登   录" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/layui/layui.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    layui.use(['form', 'layer'], function () {
+        var remember = false;
+
+        document.getElementById("btn_login").onclick = function () {
+            console.log('click');
+            let user_account = document.getElementById("user_account").value;
+            let password = document.getElementById("password").value;
+
+            if (user_account == "") {
+                layer.msg("请输入账号");
+                return;
+            }
+            if (password == "") {
+
+                layer.msg("请输入密码");
+                return;
+            }
+           let index= layer.load(2);
+            axios.post("/api/accountdata/login", { accountname: user_account, password: password, remember: remember})
+                .then(function (response) {
+                    layer.close(index);
+                    console.log(response);
+                    layer.msg(response.data.message);
+                    if (!response.data.isSuccess) {
+                        return;
+                    }
+                    //储存token
+                    window.localStorage.setItem("credentials", JSON.stringify(response.data.content.account));
+                    window.localStorage.setItem("userroutes", JSON.stringify(response.data.content.viewRoutes));
+                    window.location.replace(response.data.content.defaultUrl);
+                })
+                .catch(function (error) {
+                    layer.close(index);
+                    layer.msg("发生了预料之外的错误!");
+                    console.log(error);
+                });
+
+        }
+
+        document.getElementById("remember").onclick = function () {
+            console.log("click");
+            remember = !remember;
+            console.log(remember);
+            if (remember) {
+                document.getElementById("checked").style.display = "inline";
+                document.getElementById("unchecked").style.display = "none";
+            }
+            else {
+                document.getElementById("checked").style.display = "none" ;
+                document.getElementById("unchecked").style.display = "inline";
+            }
+           
+        }
+
+
+        document.onkeydown = function (event) {
+            var e = event || window.event;
+            if (e && e.keyCode == 13) { //回车键的键值为13
+                document.getElementById("btn_login").onclick(); //调用登录按钮的登录事件
+            }
+        }; 
+
+    })
+
+
+</script>

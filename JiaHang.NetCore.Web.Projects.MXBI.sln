@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.106
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiaHang.NetCore.Web.Projects.MXBI.BLL", "JiaHang.NetCore.Web.Projects.MXBI.BLL\JiaHang.NetCore.Web.Projects.MXBI.BLL.csproj", "{50809472-009D-474A-A6F2-4D47B6420CDD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiaHang.NetCore.Web.Projects.MXBI.Model", "JiaHang.NetCore.Web.Projects.MXBI.Model\JiaHang.NetCore.Web.Projects.MXBI.Model.csproj", "{F19D4EF6-1EDB-4AF9-933E-BCA7C22F3F18}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiaHang.NetCore.Web.Projects.MXBI.DAL", "JiaHang.NetCore.Web.Projects.MXBI.DAL\JiaHang.NetCore.Web.Projects.MXBI.DAL.csproj", "{8ECABF85-C21B-489E-98F5-2F1EF0CEE044}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiaHang.NetCore.Web.Projects.MXBI.Web", "JiaHang.NetCore.Web.Projects.MXBI.Web\JiaHang.NetCore.Web.Projects.MXBI.Web.csproj", "{916BC15D-930D-43B2-89D9-DEEA900B7BA2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiaHang.NetCore.Web.Projects.MXBI.Common", "JiaHang.NetCore.Web.Projects.MXBI.Common\JiaHang.NetCore.Web.Projects.MXBI.Common.csproj", "{F211BDB4-13BC-4A16-819D-93362FF3B0A2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiaHang.NerCore.Web.Projects.MXBI.Utils", "JiaHang.NerCore.Web.Projects.MXBI.Utils\JiaHang.NerCore.Web.Projects.MXBI.Utils.csproj", "{58ED39B1-C175-4F55-886C-8491F0FD13C2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{50809472-009D-474A-A6F2-4D47B6420CDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50809472-009D-474A-A6F2-4D47B6420CDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50809472-009D-474A-A6F2-4D47B6420CDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50809472-009D-474A-A6F2-4D47B6420CDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F19D4EF6-1EDB-4AF9-933E-BCA7C22F3F18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F19D4EF6-1EDB-4AF9-933E-BCA7C22F3F18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F19D4EF6-1EDB-4AF9-933E-BCA7C22F3F18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F19D4EF6-1EDB-4AF9-933E-BCA7C22F3F18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ECABF85-C21B-489E-98F5-2F1EF0CEE044}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ECABF85-C21B-489E-98F5-2F1EF0CEE044}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ECABF85-C21B-489E-98F5-2F1EF0CEE044}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ECABF85-C21B-489E-98F5-2F1EF0CEE044}.Release|Any CPU.Build.0 = Release|Any CPU
+		{916BC15D-930D-43B2-89D9-DEEA900B7BA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{916BC15D-930D-43B2-89D9-DEEA900B7BA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{916BC15D-930D-43B2-89D9-DEEA900B7BA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{916BC15D-930D-43B2-89D9-DEEA900B7BA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F211BDB4-13BC-4A16-819D-93362FF3B0A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F211BDB4-13BC-4A16-819D-93362FF3B0A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F211BDB4-13BC-4A16-819D-93362FF3B0A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F211BDB4-13BC-4A16-819D-93362FF3B0A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58ED39B1-C175-4F55-886C-8491F0FD13C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58ED39B1-C175-4F55-886C-8491F0FD13C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58ED39B1-C175-4F55-886C-8491F0FD13C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58ED39B1-C175-4F55-886C-8491F0FD13C2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6467CEDF-AF21-4371-9648-EC39290D08E5}
+	EndGlobalSection
+EndGlobal

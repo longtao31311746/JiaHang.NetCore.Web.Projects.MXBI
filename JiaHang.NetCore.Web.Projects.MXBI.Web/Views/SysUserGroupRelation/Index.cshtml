@@ -1,0 +1,198 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<style>
+    .layui-layer-shade {
+        display: none;
+    }
+
+    .layui-select-title input {
+        width: 180px;
+    }
+</style>
+
+<div id="app">
+
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="/demo/">系统管理</a>
+        <a><cite>用户 - 用户组</cite></a>
+    </span>
+
+    <div class="layui-fluid" style="margin-top:20px;">
+        <div class="layui-row layui-col-space15">
+            <div v-for="group in userGroups" :key="group.id" class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        {{group.name}}
+                        <button class="layui-btn" @@click="showGenerateLayer(group)" style="float: right">新增绑定</button>
+                    </div>
+                    <div class="layui-card-body">
+                        <div v-if="!group.children || group.children.length===0">无关联绑定。</div>
+                        <el-row :gutter="10">
+                            <el-col :sm="12" :md="8" :lg="6" :xl="4" v-for="user in group.children" :key="user.id" style="margin-bottom:10px">
+                                <el-tag style="height: auto;width: 100%;">
+                                    <el-row>
+                                        <el-col :span="23">
+                                            <el-row>
+                                                <el-col :span="4">账号:</el-col>
+                                                <el-col :span="8">{{user.userAccount}}</el-col>
+                                                <el-col :span="4">姓名:</el-col>
+                                                <el-col :span="8">{{user.name}}</el-col>
+                                            </el-row>
+                                            <el-row>
+                                                <el-col :span="4">LDAP:</el-col>
+                                                <el-col :span="8">{{user.userIsLock?'是':'否'}}</el-col>
+                                                <el-col :span="4">手机:</el-col>
+                                                <el-col :span="8">{{user.userMobileNo}}</el-col>
+                                            </el-row>
+                                        </el-col>
+                                        <el-col :span="1">
+                                            <i class="el-tag__close el-icon-close" @@click="removeUserGroupRelation(group.children, user)"></i>
+                                        </el-col>
+                                    </el-row>
+                                </el-tag>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="generate_layer" style="display:none; padding:40px;">
+        <div class="layui-form layui-form-pane" action="" lay-filter="generate-form">
+
+            <el-row :gutter="10">
+                <el-col :sm="13" :md="9" :lg="8" :xl="8" v-for="user in users" :key="user.id" style="margin-bottom:10px">
+                    <el-tag style="height: auto;width: 100%;">
+                        <el-row>
+                            <el-col :span="2">
+                                <el-checkbox v-model="user.checked"></el-checkbox>
+                            </el-col>
+                            <el-col :span="22">
+                                <el-row>
+                                    <el-col :span="4">账号:</el-col>
+                                    <el-col :span="8">{{user.userAccount}}</el-col>
+                                    <el-col :span="4">姓名:</el-col>
+                                    <el-col :span="8">{{user.name}}</el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="4">LDAP:</el-col>
+                                    <el-col :span="8">{{user.userIsLock?'是':'否'}}</el-col>
+                                    <el-col :span="4">手机:</el-col>
+                                    <el-col :span="8">{{user.userMobileNo}}</el-col>
+                                </el-row>
+                            </el-col>
+                        </el-row>
+                    </el-tag>
+                </el-col>
+            </el-row>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    layui.use(['table', 'element', 'layer', 'form', 'laydate'], function () {
+        var layer = layui.layer;
+        var table = layui.table
+        var generateLayer_index = 0;
+        var layType = true;//true 新增  false 编辑
+        var user_id = 0;
+        var $ = layui.$, active = {};
+
+        var selectedGroupID = ""
+
+        new Vue({
+            el: '#app',
+            data: function () {
+                return {
+                    userGroups: [],
+                    users: [],
+                }
+            },
+            methods: {
+                fetchList: function () {
+                    var vm = this
+                    axios.get('/api/SysUserGroupRelationData')
+                        .then(function (response) {
+                            vm.userGroups = response.data.content
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        })
+                },
+                showGenerateLayer: function (group) {
+                    var vm = this
+                    axios.get('/api/SysUserGroupRelationData/NotBindUser?groupId=' + group.id)
+                        .then(function (response) {
+                            response.data.content.forEach(function (user) { user["checked"] = false })
+                            vm.users = response.data.content
+                            selectedGroupID = group.id
+                            generateLayer_index = layer.open({
+                                type: 1
+                                , title: "新增绑定 - " + group.name //不显示标题栏
+                                , closeBtn: false
+                                , shade: 0.8
+                                , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                                ,area: ['900px', '500px']
+                                , content: $('#generate_layer') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                                , btn: ['添加绑定', '取消']
+                                , yes: function (index, layero) {
+                                    vm.addUserGroupRelation()
+                                }
+                                , btn2: function (index, layero) {
+                                    vm.closeGenerateLayer()
+                                }
+                            });
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                closeGenerateLayer: function () {
+                    layer.close(generateLayer_index);
+                },
+                addUserGroupRelation: function () {
+                    var vm = this
+                    var checkedData = vm.users.filter(function (user) { return user.checked }); //idTest 即为基础参数 id 对应的值
+                    var data = checkedData.map(function (item) {
+                        return { GroupId: selectedGroupID, UserId: item.id }
+                    })
+                    axios.post('/api/SysUserGroupRelationData', data)
+                        .then(function (response) {
+                            vm.closeGenerateLayer()
+                            vm.$notify({ title: '成功', message: '添加成功', type: 'success' })
+                            vm.fetchList()
+                        })
+                        .catch(function (error) {
+                            vm.$notify({ title: '失败', message: '添加失败', type: 'error' })
+                            vm.fetchList()
+                            console.log(error);
+                        });
+                },
+                removeUserGroupRelation: function (list, user) {
+                    var vm = this
+                    var relationId = user.relationId
+                    list.splice(list.indexOf(user), 1);
+                    axios.delete('/api/SysUserGroupRelationData/' + relationId)
+                        .then(function (response) {
+                            vm.$notify({ title: '成功', message: '移除成功', type: 'success' })
+                        })
+                        .catch(function (error) {
+                            vm.$notify({ title: '失败', message: '移除失败', type: 'error' })
+                            vm.fetchList()
+                            console.log(error);
+                        });
+                }
+            },
+            mounted: function () {
+                var vm = this
+                vm.fetchList()
+            }
+        })
+    });
+
+</script>

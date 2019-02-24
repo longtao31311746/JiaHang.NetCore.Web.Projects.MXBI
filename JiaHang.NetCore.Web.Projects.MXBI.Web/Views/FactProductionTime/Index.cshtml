@@ -1,0 +1,407 @@
+﻿
+@{
+    ViewData["Title"] = "ProductionTime";
+}
+<div>
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="/demo/">模块</a>
+        <a><cite>ProductionTime</cite></a>
+    </span>
+    <div class="layui-form" style="background-color:#F2F2F2;padding:30px 20px;margin-top:20px;">
+        <div class="layui-form-item">
+            区域：
+            <div class="layui-inline">
+                <select name="interest" id="search_region" lay-filter="region">
+                    <option value=""></option>
+
+                </select>
+            </div>
+            城市：
+            <div class="layui-inline">
+                <select name="interest" id="search_city" lay-filter="city">
+                    <option value=""></option>
+
+                </select>
+            </div>
+            DM：
+            <div class="layui-inline">
+                <select name="interest" id="search_dm" lay-filter="dm">
+                    <option value=""></option>
+
+                </select>
+            </div>
+            店铺：
+            <div class="layui-inline">
+                <select name="interest" id="search_store" lay-filter="store">
+                    <option value=""></option>
+                </select>
+            </div>
+            数据类型：
+            <div class="layui-inline">
+                <select name="interest" id="search_dataType" lay-filter="store">
+                    <option value="">全部</option>
+                    <option value="1">仅A-La-Cart</option>
+                    <option value="2">仅Belt</option>
+                    <option value="3">仅手工Belt</option>
+                </select>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">日期范围</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="end" placeholder="-">
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-form-item" style="margin-top:30px;">
+            <button class="layui-btn btn-search" data-type="search">条件查询</button>
+            <a class="layui-btn" data-type="export">导出</a>
+        </div>
+    </div>
+    <table class="layui-hide" id="test" lay-filter="sysuser" width="2500"></table>
+</div>
+<script>
+    var cityData = [];
+    var cityOptions = [];
+    var cityDP = [];
+    layui.use(['table', 'element', 'layer', 'form', 'laydate'], function () {
+        var table = layui.table;
+        var element = layui.element;
+        var layer = layui.layer;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var generateLayer_index = 0;
+        var layType = true;//true 新增  false 编辑
+        var id = "";
+
+        //日期
+        laydate.render({
+            elem: '#end'
+            , range: true
+        });
+
+        table.render({
+            elem: '#test'
+            , url: '/api/FactProductionTimeData/search/'
+            , cellMinWidth: 100//定义最小列宽
+            , contentType: 'application/json'
+            , method: 'post'
+            , parseData: function (res) { //res 即为原始返回的数据
+                return {
+                    "status": res.isSuccess,
+                    "code": res.isSuccess == true ? 0 : 1, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": res.content.total, //解析数据长度
+                    "data": res.content.data //解析数据列表
+                };
+            }
+            , cols: [[
+                //标题栏
+                { align: 'center', title: '全国', colspan: 9 }
+            ], [
+                { field: 'productCode', title: '产品编号', sort: true, width: 120 } //rowspan即纵向跨越的单元格数
+                , { field: 'productName', title: '产品名称', }
+                , { field: 'productType', title: '产品类别' }
+                , { field: 'productPrice', title: '价格', sort: true }
+                , { field: 'productionAvgTime', title: '平均制作时间', width: 220, sort: true }
+                , { field: 'productionAmount', title: '制作数量' }
+                , { field: 'productionMoney', title: '金额', sort: true }
+                , { field: 'moneyPercent', title: '金额%' }
+            ]]
+            , id: 'testReload'
+            , text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+            , done: function (res, curr, count) {
+                //设置样式
+                $('th').css({ 'background-color': '#C0C0C0', 'font-size': '18px', 'font': 'bold' });
+            }
+        });
+
+
+        var $ = layui.$, active = {
+            getCheckData: function () { //获取选中数据
+                var checkStatus = table.checkStatus('testReload')
+                    , data = checkStatus.data;
+
+
+                layer.confirm("确认删除" + data.length + "条记录么", function (index) {
+                    layer.close(index);
+
+                    let ids = [];
+                    let parms = "?";
+                    for (let i = 0; i < data.length; i++) {
+                        ids.push(data[i].id);
+                        parms += "ids=" + data[i].id + "&";
+                    }
+                    parms = parms.substring(0, parms.length - 1);
+                    //layer.alert(JSON.stringify(data));
+                    axios.delete("/api/sysmodule/batchdelete/" + parms)
+                        .then(function (response) {
+
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+
+                            //移除
+                            let tabledata = table.cache.testReload;
+
+                            tableReload(tabledata);
+
+
+                        })
+                        .catch(function (error) {
+                            layer.msg("发生了预料之外的错误!");
+                            console.log(error);
+                        });
+                });
+
+
+            },
+            //查询操作传参数
+            search: function () {
+                //var a = laydate.split("-"); //在-分解
+                //log.console(a);
+                let date_region = document.getElementById("end").value;
+                let _start = "", _end = "";
+                if (date_region != "") {
+                    _start = date_region.split(" - ")[0];
+                    _end = date_region.split(" - ")[1];
+                }
+                let pars = {
+                    limit: 10,
+                    page: 1,
+                    stRegion: $("#search_region").val(),
+                    stCity: $("#search_city").val(),
+                    stDM: $("#search_dm").val(),
+                    storeCode: $("#search_store").val(),
+                    StartTime: _start + " 00:00:00",
+                    EndTime: _end + " 00:00:00",
+                    dataType: $("#search_dataType").val(),
+                }
+                //执行重载
+                console.log($("#search_dm").val());
+
+                var sel = pars.stRegion == "" ? "" : pars.stRegion + pars.StartTime + pars.EndTime;
+                table.reload('testReload', {
+                    where: pars,
+                    contentType: 'application/json',
+                    method: 'post'
+                });
+                var spans = $("thead tr:first span");
+                $(spans[0]).html(sel);
+            },
+
+            //导出
+            export: function () {
+                console.log('export');
+
+                let date_region = document.getElementById("end").value;
+                let _start = "", _end = "";
+                if (date_region != "") {
+                    _start = date_region.split(" - ")[0];
+                    _end = date_region.split(" - ")[1];
+                }
+                let pars = {
+                    stRegion: $("#search_region").val(),
+                    stCity: $("#search_city").val,
+                    stDM: $("#search_dm").val,
+                    storeCode: $("#search_store").val(),
+                    StartTime: _start + " 00:00:00",
+                    EndTime: _end + " 00:00:00",
+                    dataType: $("#search_dataType").val(),
+                };
+                //,string stRegion,string stCity, string stDM  +  一个店铺下拉条件
+                let url = "/api/FactProductionTimeData/export?StartTime=" + _start + "&EndTime=" + _end + "&stRegion=" + $("#search_region").val() + "&stCity=" + $("#search_city").val() + "&stDM=" + $("#search_dm").val() + "&stStore=" + $("#search_store").val() + "&dataType=" + $("#search_dataType").val();
+                window.location.href = url;
+            }
+        };
+        //第一个下拉框的改变事件
+        form.on('select(region)', function (data) {
+            $("#search_dm").html("");
+            $('#search_dm').append(new Option("", ""));
+            $("#search_store").html("");
+            $('#search_store').append(new Option("", ""));
+            initSecondSelect(data.value);
+
+        })
+        //第二个下拉框的改变事件
+        form.on('select(city)', function (data) {
+            $("#search_store").html("");
+            $('#search_store').append(new Option("", ""));
+            console.log(data);
+            initThreeSelect(data.value);
+        })
+        //第三个下拉框的改变事件
+        form.on('select(dm)', function (data) {
+            console.log(data);
+            initFourSelect(data.value);
+        })
+
+        $('.layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        init();
+        function init() {
+            //  getUserGroups();
+            getCityData();
+
+        }
+
+        //初始化第一个下拉框
+        function initFirstSelect(stregion) {
+            console.log("init_select:" + stregion);
+            $("#search_region").html("");
+            $('#search_region').append(new Option("全国", ""));
+            if (cityData.length == 0) {
+                form.render('select');
+                return;
+            }
+            for (let i = 0; i < cityData.length; i++) {
+                $('#search_region').append(new Option(cityData[i].stregion, cityData[i].stregion));
+            }
+            if (stregion != null && stregion != "") {
+
+                //$("select[name='result']").val(11);
+                var select = 'dd[lay-value=' + stregion + ']';
+                $('#search_region').siblings("div.layui-form-select").find('dl').find(select).click();
+            }
+
+            form.render('select');
+        }
+        //初始化第二个下拉框
+        function initSecondSelect(stregion) {
+            console.log("init_second_select:" + stregion);
+            let listStcity = [];
+            for (let i = 0; i < cityData.length; i++) {
+                console.log(cityData[i].stregion);
+                if (cityData[i].stregion == stregion) {
+                    listStcity = cityData[i].listStcity;
+                    break;
+                }
+            }
+            console.log(listStcity);
+            $("#search_city").html("");
+            $('#search_city').append(new Option("", ""));
+            cityOptions = listStcity;
+            for (let j = 0; j < listStcity.length; j++) {
+                $('#search_city').append(new Option(listStcity[j].stcity, listStcity[j].stcity));
+            }
+            form.render('select');
+        }
+        //初始化第三个下拉框
+        function initThreeSelect(stcity) {
+            console.log(cityOptions);
+            console.log("init_Threeselect:" + stcity);
+            //获取不到值undefined
+            let listStdm = [];
+            for (let i = 0; i < cityOptions.length; i++) {
+
+                if (cityOptions[i].stcity == stcity) {
+                    listStdm = cityOptions[i].listStdm;
+                    break;
+                }
+            }
+            console.log(listStdm);
+            $("#search_dm").html("");
+            $('#search_dm').append(new Option("", ""));
+            cityDP = listStdm;
+            for (let j = 0; j < listStdm.length; j++) {
+                $('#search_dm').append(new Option(listStdm[j].stdm, listStdm[j].stdm));
+            }
+            form.render('select');
+        }
+        //初始化第四个下拉框
+        function initFourSelect(stdm) {
+            console.log(cityDP);
+            console.log("init_Fourselect:" + stdm);
+            //获取不到值undefined
+            let listStore = [];
+            for (let i = 0; i < cityDP.length; i++) {
+
+                if (cityDP[i].stdm == stdm) {
+                    listStore = cityDP[i].listStore;
+                    break;
+                }
+            }
+            console.log(listStore);
+            $("#search_store").html("");
+            $('#search_store').append(new Option("", ""));
+
+            for (let j = 0; j < listStore.length; j++) {
+                $('#search_store').append(new Option(listStore[j].ststore, listStore[j].ststore));
+            }
+            form.render('select');
+        }
+
+        //初始化Form值
+        function initFormValue(data) {
+            $("#first_select").removeAttr("disabled");
+            $("#second_select").removeAttr("disabled");
+            if (data == undefined) {
+
+                form.val("generate-form", {
+                    name: "",
+                    firstid: "",
+                    secondid: ""
+                })
+                return;
+            }
+
+            form.val("generate-form", {
+                name: data.name,
+                firstId: data.firstId,
+                secondId: data.secondId
+            });
+
+            $("#level").val(data.level);
+
+
+            form.render('select');
+            //初始化第一个下拉框
+            initFirstSelect(data.firstId);
+            //初始化第二个下拉框
+            initSecondSelect(data.firstId, data.secondId);
+            //初始化第三个下拉框
+            initThreeSelect(data.firstId, data.tre);
+            if (data.level == "一级用户组") {
+                $("#first_select").attr("disabled", "disabled");
+                $("#second_select").attr("disabled", "disabled");
+            }
+            if (data.level == "二级用户组") {
+                $("#second_select").attr("disabled", "disabled");
+            }
+            form.render('select');
+
+        }
+        function tableReload(datatable) {
+
+            table.reload("testReload", {
+                data: datatable
+            })
+        }
+
+        //获取联动数据josn
+        function getCityData() {
+            axios.get('/api/FactProductionTimeData/acquisitioncitydata')
+                .then(function (response) {
+                    console.log(response);
+                    cityData = response.data.content;
+                    initFirstSelect();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    });
+
+
+
+</script>
+
+
+

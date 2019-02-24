@@ -1,0 +1,84 @@
+﻿
+<div class="layui-side layui-bg-black">
+    <div class="layui-side-scroll" style="user-select: none;-moz-user-select: none;-webkit-user-select: none;-ms-user-select: none;-o-user-select: none;-khtml-user-select: none; ">
+        <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+        <ul class="layui-nav layui-nav-tree" id="side"></ul>
+
+    </div>
+</div>
+
+
+
+<script>
+    //读取菜单
+    var routes_str = window.localStorage.getItem("userroutes");
+
+
+    if (routes_str != null) {
+        routes = JSON.parse(routes_str);
+        console.log(routes);
+        //获取当前模块id
+        var current_moduleId = window.localStorage.getItem("current_moduleId");
+        let side = document.getElementById("side");
+
+        let c_routes = routes[0];
+        for (let i = 0; i < routes.length; i++) {
+            if (routes[i].moduleId === current_moduleId) {
+                //generateMenu(side, [routes[i]], 1);
+                c_routes = routes[i];
+                break;
+            }
+        }
+        console.log(c_routes);
+        var data = [c_routes];
+        generateMenu(side, data, 1);
+    }
+
+
+    function generateMenu(dom, routes, rindex) {
+        console.log(routes);
+        for (let i = 0; i < routes.length; i++) {
+            let index = rindex;
+            let li = document.createElement("li");
+            let li_class_name = "layui-nav-item";
+            if (i == 0)
+                li_class_name += " layui-nav-itemed";
+            li.className = li_class_name;
+            let a = document.createElement("a");
+            a.innerHTML = routes[i].moduleName;
+            a.style.textIndent = 15 * index + 'px';
+            li.appendChild(a);
+            let dl = document.createElement("dl");
+            dl.classList = "layui-nav-child";
+
+
+            let controllers = routes[i].controllers;
+            for (let j = 0; j < controllers.length; j++) {
+                if (controllers[j].methods.length > 1) {
+                    let methods = controllers[j];
+                    for (let m = 0; m < methods.length; m++) {
+                        let dd = document.createElement("dd");
+                        dd.innerHTML = "<a href=" + methods[m].completePath + ">" + methods[m].methodAlias + "</a>";
+                        dd.style.textIndent = 15 * index + 'px';
+                        dl.appendChild(dd);
+                    }
+                    continue;
+                }
+
+                let dd = document.createElement("dd");
+                dd.innerHTML = "<a href=" + controllers[j].methods[0].completePath + ">" + controllers[j].controllerAlias + "</a>";
+                dd.style.textIndent = 15 * index + 'px';
+                dl.appendChild(dd);
+            }
+
+            li.appendChild(dl)
+            let children = routes[i].children;
+            if (children.length > 0) {
+                console.log(index);
+                index++;
+                generateMenu(dl, routes[i].children, index);
+            }
+            dom.appendChild(li);
+        }
+    }
+</script>

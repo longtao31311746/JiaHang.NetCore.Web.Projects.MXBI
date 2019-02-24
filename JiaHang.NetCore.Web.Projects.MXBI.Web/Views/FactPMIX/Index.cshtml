@@ -1,0 +1,482 @@
+﻿
+@{
+    ViewData["Title"] = "PMIX";
+}
+<script src="~/layui/css/dist/formSelects-v4.js"></script>
+<link href="~/layui/css/dist/formSelects-v4.css" rel="stylesheet" />
+<div>
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="/demo/">模块</a>
+        <a><cite>PMIX</cite></a>
+    </span>
+    <div class="layui-form" style="background-color:#F2F2F2;padding:30px 20px;margin-top:20px;">
+        <div class="layui-form-item">
+            品牌：
+            <div class="layui-inline">
+                <select name="search_brand" id="search_brand" lay-filter="brand">
+                    <option value=""></option>
+
+                </select>
+            </div>
+            区域：
+            <div class="layui-inline">
+                <select name="search_region" id="search_region" lay-filter="region">
+                    <option value=""></option>
+
+                </select>
+            </div>
+            城市：
+            <div class="layui-inline">
+                <select name="search_city" id="search_city" lay-filter="city">
+                    <option value=""></option>
+
+                </select>
+            </div>
+            DM：
+            <div class="layui-inline">
+                <select name="search_dm" id="search_dm" lay-filter="dm">
+                    <option value=""></option>
+
+                </select>
+            </div>
+            店铺：
+            <div class="layui-inline">
+                <select name="search_store" id="search_store" lay-filter="store">
+                    <option value=""></option>
+                </select>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">日期范围</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="end" placeholder="-">
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-form-item" style="margin-top:30px; ">
+            <button class="layui-btn btn-search" data-type="search">条件查询</button>
+            <a class="layui-btn" data-type="export">导出</a>
+        </div>
+    </div>
+    <table class="layui-hide" id="test" lay-filter="sysuser" width="2500">
+        @*<thead>
+                <tr>
+                    <th lay-data="{align:'center'}" colspan="10">店铺8088</th>
+                    <th lay-data="{align:'center'}" colspan="3">Belt</th>
+                    <th lay-data="{align:'center'}" colspan="3">A-La-Cart</th>
+                    <th lay-data="{align:'center'}" colspan="2"></th>
+                </tr>
+                <tr>
+                    <th lay-data="{field:'productCode', width:120}">产品编号</th>
+                    <th lay-data="{field:'productName', width:120}">产品名称</th>
+                    <th lay-data="{field:'dish_Color', width:200}">色碟</th>
+                    <th lay-data="{field:'category', width:200}">类别</th>
+                    <th lay-data="{field:'price', width:120}">价格</th>
+                    <th lay-data="{field:'cost', width:120}">成本单价</th>
+                    <th lay-data="{field:'tradeAmount', width:200}">售出数</th>
+                    <th lay-data="{field:'tradePercent', width:200}">售出数%</th>
+                    <th lay-data="{field:'tradeMoney', width:120}">金额</th>
+                    <th lay-data="{field:'tradeAmountBelt', width:120}">金额%</th>
+                    <th lay-data="{field:'tradeAmountBelt', width:200}">售出</th>
+                    <th lay-data="{field:'tradePercentBelt', width:200}">售出数%</th>
+                    <th lay-data="{field:'tradeMoneyBelt', width:120}">金额</th>
+                    <th lay-data="{field:'tradeAmountAlacart', width:200}">售出</th>
+                    <th lay-data="{field:'tradePercentAlacart', width:200}">售出数%</th>
+                    <th lay-data="{field:'tradeMoneyAlacart', width:120}">金额</th>
+                    <th lay-data="{field:'costMoney', width:200}">成本金额%</th>
+                    <th lay-data="{field:'costPercent', width:120}">成本%</th>
+                </tr>
+            </thead>*@
+    </table>
+</div>
+<script>
+    var cityData = [];
+    //品牌下的所有数据
+    var brandData = [];
+    var cityOptions = [];
+    var cityDP = [];
+    layui.use(['table', 'element', 'layer', 'form', 'laydate'], function () {
+        var table = layui.table;
+        var element = layui.element;
+        var layer = layui.layer;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var generateLayer_index = 0;
+        var layType = true;//true 新增  false 编辑
+        var id = "";
+
+        //日期
+        laydate.render({
+            elem: '#end'
+            , range: true
+        });
+        table.render({
+            elem: '#test'
+            , url: '/api/FactPMIXData/search/'
+            , cellMinWidth: 100//定义最小列宽
+            , contentType: 'application/json'
+            , method: 'post'
+            , parseData: function (res) { //res 即为原始返回的数据
+                return {
+                    "status": res.isSuccess,
+                    "code": res.isSuccess == true ? 0 : 1, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": res.content.total, //解析数据长度
+                    "data": res.content.data //解析数据列表
+                };
+            }
+            , cols: [[
+                //标题栏
+                { align: 'center', title: '全国', colspan: 10 }
+                , { align: 'center', title: 'Belt', colspan: 3 }
+                , { align: 'center', title: 'A-La-Cart', colspan: 3 }
+                , { align: 'center', title: '', colspan: 2 }//colspan即横跨的单元格数，这种情况下不用设置field和width
+            ], [
+                { field: 'productCode', rowspan: 2, title: '产品编号', sort: true, width: 120 } //rowspan即纵向跨越的单元格数
+                , { field: 'productName', rowspan: 2, title: '产品名称', }
+                , { field: 'dish_Color', rowspan: 2, title: '色碟' }
+                , { field: 'category', rowspan: 2, title: '类别' }
+                , { field: 'price', rowspan: 2, title: '价格', sort: true }
+                , { field: 'cost', rowspan: 2, title: '成本价', sort: true }
+                , { field: 'tradeAmount', rowspan: 2, title: '售出数', sort: true }
+                , { field: 'tradePercent', rowspan: 2, title: '售出数%' }
+                , { field: 'tradeMoney', rowspan: 2, title: '金额', sort: true }
+                , { field: 'tradeMoneyPercent', rowspan: 2, title: '金额%', sort: true }
+                , { field: 'tradeAmountBelt', rowspan: 2, title: '售出数(Belt)' }
+                , { field: 'tradePercentBelt', rowspan: 2, title: '售出数%(Belt)', }
+                , { field: 'tradeMoneyBelt', rowspan: 2, title: '金额(Belt)' }
+                , { field: 'tradeAmountAlacart', rowspan: 2, title: '售出数(A-La-Cart)', sort: true }
+                , { field: 'tradePercentAlacart', rowspan: 2, title: '售出数%(A-La-Cart)', sort: true }
+                , { field: 'tradeMoneyAlacart', rowspan: 2, title: '金额(A-La-Cart)', sort: true }
+                , { field: 'costMoney', rowspan: 2, title: '成本金额', sort: true }
+                , { field: 'costPercent', rowspan: 2, title: '成本%', sort: true }
+            ]]
+
+            , id: 'testReload'
+            , text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+            , done: function (res, curr, count) {
+                //设置样式
+                $('th').css({ 'background-color': '#C0C0C0', 'font-size': '18px', 'font': 'bold' });
+            }
+
+        });
+        var $ = layui.$, active = {
+            getCheckData: function () { //获取选中数据
+                var checkStatus = table.checkStatus('testReload')
+                    , data = checkStatus.data;
+
+
+                layer.confirm("确认删除" + data.length + "条记录么", function (index) {
+                    layer.close(index);
+
+                    let ids = [];
+                    let parms = "?";
+                    for (let i = 0; i < data.length; i++) {
+                        ids.push(data[i].id);
+                        parms += "ids=" + data[i].id + "&";
+                    }
+                    parms = parms.substring(0, parms.length - 1);
+                    //layer.alert(JSON.stringify(data));
+                    axios.delete("/api/sysmodule/batchdelete/" + parms)
+                        .then(function (response) {
+
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+
+                            //移除
+                            let tabledata = table.cache.testReload;
+
+                            tableReload(tabledata);
+
+
+                        })
+                        .catch(function (error) {
+                            layer.msg("发生了预料之外的错误!");
+                            console.log(error);
+                        });
+                });
+
+
+            },
+            //查询操作传参数
+            search: function () {
+                //var a = laydate.split("-"); //在-分解
+                //log.console(a);
+                let date_region = document.getElementById("end").value;
+                let _start = "", _end = "";
+                if (date_region != "") {
+                    _start = date_region.split(" - ")[0];
+                    _end = date_region.split(" - ")[1];
+                }
+                let pars = {
+                    limit: 10,
+                    page: 1,
+                    stBrand: $("#search_brand").val(),
+                    stRegion: $("#search_region").val(),
+                    stCity: $("#search_city").val(),
+                    stDM: $("#search_dm").val(),
+                    storeCode: $("#search_store").val(),
+                    StartTime: _start + " 00:00:00",
+                    EndTime: _end + " 00:00:00",
+                }
+                //执行重载
+                console.log($("#search_dm").val());
+                //第一行显示查询条件+ stCity + "," + stDM + "," + storeCode + ","
+
+                var sel = pars.stRegion == "" ? "" : pars.stRegion + "," + _start + " 至  " + _end;
+                table.reload('testReload', {
+                    where: pars,
+                    contentType: 'application/json',
+                    method: 'post'
+                });
+                var spans = $("thead tr:first span");
+                $(spans[0]).html(sel);
+            },
+
+            //导出
+            export: function () {
+                console.log('export');
+
+                let date_region = document.getElementById("end").value;
+                let _start = "", _end = "";
+                if (date_region != "") {
+                    _start = date_region.split(" - ")[0];
+                    _end = date_region.split(" - ")[1];
+                }
+                let pars = {
+                    stBrand: $("#search_brand").val(),
+                    stRegion: $("#search_region").val(),
+                    stCity: $("#search_city").val,
+                    stDM: $("#search_dm").val,
+                    storeCode: $("#search_store").val(),
+                    StartTime: _start + " 00:00:00",
+                    EndTime: _end + " 00:00:00",
+                };
+                //,string stRegion,string stCity, string stDM  +  一个店铺下拉条件
+                let url = "/api/factpmixdata/export?StartTime=" + _start + "&EndTime=" + _end + "&stBrand=" + $("#search_brand").val() + "&stRegion=" + $("#search_region").val() + "&stCity=" + $("#search_city").val() + "&stDM=" + $("#search_dm").val() + "&stStore=" + $("#search_store").val();
+                window.location.href = url;
+            }
+        };
+        //品牌改变事件
+        form.on('select(brand)', function (data) {
+            $("#search_city").html("");
+            $('#search_dm').append(new Option("", ""));
+            $("#search_store").html("");
+            $('#search_store').append(new Option("", ""));
+            initFirstSelect(data.value);
+        })
+        //第一个下拉框的改变事件
+        form.on('select(region)', function (data) {
+            $("#search_dm").html("");
+            $('#search_dm').append(new Option("", ""));
+            $("#search_store").html("");
+            $('#search_store').append(new Option("", ""));
+            initSecondSelect(data.value);
+
+        })
+        //第二个下拉框的改变事件
+        form.on('select(city)', function (data) {
+            $("#search_store").html("");
+            $('#search_store').append(new Option("", ""));
+            console.log(data);
+            initThreeSelect(data.value);
+        })
+        //第三个下拉框的改变事件
+        form.on('select(dm)', function (data) {
+            console.log(data);
+            initFourSelect(data.value);
+        })
+
+        $('.layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        init();
+        function init() {
+            //  getUserGroups();
+            getCityData();
+
+        }
+        //初始化品牌下拉框
+        function initBrandSelect(stbrand) {
+            $("#search_brand").html("");
+            $("#search_brand").append(new Option("全品牌", ""));
+            if (cityData.length == 0) {
+                form.render('select');
+                return;
+            }
+            for (let i = 0; i < cityData.length; i++) {
+                $('#search_brand').append(new Option(cityData[i].stbrand, cityData[i].stbrand));
+            }
+            if (stbrand != null && stbrand != "") {
+
+                var select = 'dd[lay-value=' + stbrand + ']';
+                $('#search_brand').siblings("div.layui-form-select").find('dl').find(select).click();
+            }
+
+            form.render('select');
+        }
+
+        //初始化第一个下拉框
+        function initFirstSelect(stbrand) {
+            console.log("init_First_select:" + stbrand);
+            let listStregion = [];
+            for (let i = 0; i < cityData.length; i++) {
+                console.log(cityData[i].stbrand);
+                if (cityData[i].stbrand == stbrand) {
+                    listStregion = cityData[i].listStregion;
+                    break;
+                }
+            }
+            console.log(listStregion);
+            $("#search_region").html("");
+            $('#search_region').append(new Option("全国", ""));
+            brandData = listStregion;
+            for (let j = 0; j < listStregion.length; j++) {
+                $('#search_region').append(new Option(listStregion[j].stregion, listStregion[j].stregion));
+            }
+            form.render('select');
+        }
+        //初始化第二个下拉框
+        function initSecondSelect(stregion) {
+            console.log("init_second_select:" + stregion);
+            let listStcity = [];
+            for (let i = 0; i < cityData.length; i++) {
+                console.log(brandData[i].stregion);
+                if (brandData[i].stregion == stregion) {
+                    listStcity = brandData[i].listStcity;
+                    break;
+                }
+            }
+            console.log(listStcity);
+            $("#search_city").html("");
+            $('#search_city').append(new Option("全省", ""));
+            cityOptions = listStcity;
+            for (let j = 0; j < listStcity.length; j++) {
+                $('#search_city').append(new Option(listStcity[j].stcity, listStcity[j].stcity));
+            }
+            form.render('select');
+        }
+        //初始化第三个下拉框
+        function initThreeSelect(stcity) {
+            console.log("init_Threeselect:" + stcity);
+            //获取不到值undefined
+            let listStdm = [];
+            for (let i = 0; i < cityOptions.length; i++) {
+
+                if (cityOptions[i].stcity == stcity) {
+                    listStdm = cityOptions[i].listStdm;
+                    break;
+                }
+            }
+            console.log(listStdm);
+            $("#search_dm").html("");
+            $('#search_dm').append(new Option("全经理", ""));
+            cityDP = listStdm;
+            for (let j = 0; j < listStdm.length; j++) {
+                $('#search_dm').append(new Option(listStdm[j].stdm, listStdm[j].stdm));
+            }
+            form.render('select');
+        }
+        //初始化第四个下拉框
+        function initFourSelect(stdm) {
+            console.log(cityDP);
+            console.log("init_Fourselect:" + stdm);
+            //获取不到值undefined
+            let listStore = [];
+            for (let i = 0; i < cityDP.length; i++) {
+
+                if (cityDP[i].stdm == stdm) {
+                    listStore = cityDP[i].listStore;
+                    break;
+                }
+            }
+            console.log(listStore);
+            $("#search_store").html("");
+            $('#search_store').append(new Option("全店", ""));
+
+            for (let j = 0; j < listStore.length; j++) {
+                $('#search_store').append(new Option(listStore[j].ststore, listStore[j].ststore));
+            }
+            form.render('select');
+        }
+
+        //初始化Form值
+        function initFormValue(data) {
+            $("#first_select").removeAttr("disabled");
+            $("#second_select").removeAttr("disabled");
+            if (data == undefined) {
+
+                form.val("generate-form", {
+                    name: "",
+                    firstid: "",
+                    secondid: ""
+                })
+                return;
+            }
+
+            form.val("generate-form", {
+                name: data.name,
+                firstId: data.firstId,
+                secondId: data.secondId
+            });
+
+            $("#level").val(data.level);
+
+
+            form.render('select');
+            //初始化品牌
+            initBrandSelect(data.firstId);
+            //初始化第一个下拉框
+            initFirstSelect(data.firstId, data.secondId);
+            //初始化第二个下拉框
+            initSecondSelect(data.firstId, data.secondId);
+            //初始化第三个下拉框
+            initThreeSelect(data.firstId, data.theeeId);
+            if (data.level == "一级用户组") {
+                $("#first_select").attr("disabled", "disabled");
+                $("#second_select").attr("disabled", "disabled");
+            }
+            if (data.level == "二级用户组") {
+                $("#second_select").attr("disabled", "disabled");
+            }
+            form.render('select');
+
+        }
+        function tableReload(datatable) {
+
+            table.reload("testReload", {
+                data: datatable
+            })
+        }
+
+        //获取联动数据josn
+        function getCityData() {
+            axios.get('/api/FactPMIXData/acquisitioncitydata')
+                .then(function (response) {
+                    console.log(response);
+                    cityData = response.data.content;
+                    //重载brand品牌
+                    initBrandSelect();
+                    //第一个下拉框的重载
+
+                    //initFirstSelect();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    });
+
+
+
+</script>
+
+
+

@@ -1,0 +1,454 @@
+﻿
+@{
+    ViewData["Title"] = "测试  存储过程调用";
+}
+
+
+
+<style>
+    .layui-layer-shade { display: none; }
+
+    .layui-select-title input { width: 180px; }
+</style>
+<div>
+
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="/#/">系统模块</a>
+        <a><cite>模块管理</cite></a>
+    </span>
+    <div class="layui-form" style="background-color:#F2F2F2;padding:30px 20px;margin-top:20px;">
+        <div class="layui-form-item">
+            组别代码：
+            <div class="layui-inline">
+                <input class="layui-input" name="id" id="search_user_account" autocomplete="off">
+            </div>
+            组别名称：
+            <div class="layui-inline">
+                <input class="layui-input" name="id" id="search_user_name" autocomplete="off">
+            </div>
+            父级ID：
+            <div class="layui-inline">
+                <input class="layui-input" name="id" id="search_demoReload" autocomplete="off">
+            </div>
+            是否有效：
+            <div class="layui-inline">
+                <select name="interest" id="search_user_is_ldap" lay-filter="aihao">
+                    <option value=""></option>
+                    <option value="0" selected="">有效</option>
+                    <option value="1">无效</option>
+                </select>
+            </div>
+            用户类型：
+            <div class="layui-inline">
+                <select name="interest" id="search_user_ower" lay-filter="aihao">
+                    <option value=""></option>
+                    <option value="1">管理员</option>
+                    <option value="2">领导</option>
+                    <option value="4">kds报表用户</option>
+                </select>
+            </div>
+
+        </div>
+        <div class="layui-form-item" style="margin-top:30px;">
+            <button class="layui-btn btn-search" data-type="search">条件查询</button>
+            <button class="layui-btn" data-type="showGenerateLayer">新增用户</button>
+            <button class="layui-btn" data-type="getCheckData">选中行删除</button>
+        </div>
+
+    </div>
+    <table class="layui-hide" id="test" lay-filter="sysuser"> </table>
+
+</div>
+<div id="generate_layer" style="display:none; padding:40px;">
+    <div class="layui-form layui-form-pane" action="" lay-filter="generate-form">
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <div class="layui-inline">
+                    <label class="layui-form-label">模块ID</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="model_group_id" id="model_group_id" autocomplete="off" placeholder="模块ID" class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">组别代码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="model_group_code" id="model_group_code" autocomplete="off" placeholder="组别代码" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">组别名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="model_group_name" id="model_group_name" autocomplete="off" placeholder="组别名称" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">父级id</label>
+                <div class="layui-input-block">
+                    <input type="number" name="parent_id" id="parent_id" autocomplete="off" placeholder="父级id" class="layui-input" lay-verify="number">
+                </div>
+            </div>
+
+
+        </div>
+        <div class="layui-form-item">
+
+            <div class="layui-inline">
+                <label class="layui-form-label">排序值</label>
+                <div class="layui-input-block">
+                    <input type="number" name="sort_flag" id="sort_flag" autocomplete="off" placeholder="排序值" class="layui-input" lay-verify="number">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">是否有效</label>
+                <div class="layui-input-block">
+                    <select name="interest" id="enable_flag" lay-filter="aihao">
+                        <option value=""></option>
+                        <option value="0">否</option>
+                        <option value="1" selected="">是</option>
+
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">模块组别图片地址</label>
+                <div class="layui-input-block">
+                    <input type="text" name="image_url" id="image_url" autocomplete="off" placeholder="排序值" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">组别归属</label>
+                <div class="layui-input-block">
+                    <input type="text" name="group_belong" id="group_belong" autocomplete="off" placeholder="组别归属" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-inline">
+                <label class="layui-form-label">模块所属业务代码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="biz_sys_code" id="biz_sys_code" autocomplete="off" placeholder="模块所属业务代码" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <button class="layui-btn" data-type="generate" id="generate_btn" lay-submit lay-filter="submit">立即创建</button>
+            <button class="layui-btn layui-layer-btn1" lay-filter="demo2" data-type="closeGenerateLayer">取消</button>
+        </div>
+    </div>
+
+
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script>
+
+    layui.use(['table', 'element', 'layer', 'form', 'laydate'], function () {
+        var table = layui.table;
+        var element = layui.element;
+        var layer = layui.layer;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var generateLayer_index = 0;
+        var layType = true;//true 新增  false 编辑
+        var model_group_id = 0;
+        //日期
+        laydate.render({
+            elem: '#eff_start_date'
+        });
+        laydate.render({
+            elem: '#eff_end_date'
+        });
+
+
+        table.render({
+            elem: '#test'
+            , url: '/api/sysmodelgroupdata/search/'
+            , contentType: 'application/json'
+            , method: 'post'
+            , parseData: function (res) { //res 即为原始返回的数据
+                return {
+                    "status": res.isSuccess,
+                    "code": res.isSuccess == true ? 0 : 1, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": res.content.total, //解析数据长度
+                    "data": res.content.data //解析数据列表
+                };
+            }
+
+            , cols: [[
+                { type: 'checkbox', fixed: 'left' }
+                , { field: 'model_Group_Id', width: 80, title: 'ID', sort: true, fixed: 'left' }
+                , { field: 'model_Group_Code', title: '组别代码' }
+                , { field: 'model_Group_Name', title: '组别名称', sort: true }
+                , { field: 'parent_Id', title: '父级ID', }
+                , { field: 'sort_Flag', title: '排序值', sort: true }
+                , { field: 'enable_Flag', title: '是否有效' }
+                , { field: 'image_Url', title: '模块组别图片地址', sort: true }
+                , { field: 'group_Belong', title: '组别归属', sort: true }
+                , { field: 'biz_sys_Code', title: '模块所属业务代码', sort: true }
+                , { field: 'creation_Date', title: '创建时间', sort: true }
+                , { field: 'count', title: '汇总' }
+                , { fixed: 'right', align: 'center', toolbar: '#barDemo', fixed: 'right' } //这里的toolbar值是模板元素的选择器
+            ]]
+            , id: 'testReload'
+            , page: true,
+            text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+
+
+        table.on('checkbox(sysuser)', function (obj) {
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(sysuser)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                layer.msg('ID：' + data.id + ' 的查看操作');
+            } else if (obj.event === 'del') {
+                console.log("delete");
+                let confirm_title = "确认删除账号" + data.user_Account + "的记录么";
+                layer.confirm(confirm_title, function (index) {
+                    layer.close(index);
+                    axios.delete('/api/sysmodelgroupdata/' + data.model_group_id)
+                        .then(function (response) {
+                            console.log(response);
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+                            obj.del();
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+
+                });
+            } else if (obj.event === 'edit') {
+                // layer.alert('编辑行：<br>' + JSON.stringify(data))
+                console.log(data);
+                model_group_id = data.model_Group_Id
+                layType = false;
+                showLayer(data);
+            }
+        });
+
+        var $ = layui.$, active = {
+            getCheckData: function () { //获取选中数据
+                var checkStatus = table.checkStatus('testReload')
+                    , data = checkStatus.data;
+
+
+                layer.confirm("确认删除" + data.length + "条记录么", function (index) {
+                    layer.close(index);
+
+                    let ids = [];
+                    let parms = "?";
+                    for (let i = 0; i < data.length; i++) {
+                        ids.push(data[i].model_group_id);
+                        parms += "ids=" + data[i].model_group_id + "&";
+                    }
+                    parms = parms.substring(0, parms.length - 1);
+                    //layer.alert(JSON.stringify(data));
+                    axios.delete("/api/sysmodelgroupdata/batchdelete/" + parms)
+                        .then(function (response) {
+                            console.log(response);
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+
+                            //移除
+                            let tabledata = table.cache.testReload;
+
+                            tableReload(tabledata);
+
+
+                        })
+                        .catch(function (error) {
+                            layer.msg("发生了预料之外的错误!");
+                            console.log(error);
+                        });
+                });
+
+
+            },
+            search: function () {
+                console.log('reload');
+                let pars = {
+                    limit: 10,
+                    page: 1,
+                    User_Account: $("#search_user_account").val(),
+                    User_Name: $("#search_user_name").val(),
+                    User_Is_Ldap: 0,
+                    User_Ower: 0,
+
+                }
+                if ($("#search_user_ower").val() != "") {
+                    pars.User_Ower = Number($("#search_user_ower").val());
+                }
+                if ($("#search_user_is_ldap").val() != "") {
+                    pars.User_Is_Ldap = $("#search_user_is_ldap").val() == "1";
+                }
+                //执行重载
+                console.log(pars);
+                table.reload('testReload', {
+                    where: pars,
+                    contentType: 'application/json',
+                    method: 'post'
+                });
+            },
+            showGenerateLayer: function () {
+                console.log('show');
+                layType = true;
+                showLayer();
+            },
+            closeGenerateLayer: function () {
+                layer.close(generateLayer_index);
+            },
+
+        };
+        form.on('submit(submit)', function () {
+            console.log('save')
+            let model = {
+                modelgroupcode: $("#model_group_code").val(),
+                modelgroupname: $("#model_group_name").val(),
+                parentid: Number($("#parent_id").val()),
+                sortflag: Number($("#sort_flag").val()),
+                enableflag: $("#enable_flag").val() == "1",
+                imageurl: $("#image_url").val(),
+                groupbelong: $("#group_belong").val(),
+                bizsyscode: $("#biz_sys_code").val()
+            };
+
+            console.log(model);
+            let url = "/api/sysmodelgroupdata";
+            let method = "POST";
+            if (layType != true) {
+                url = "/api/sysmodelgroupdata/" + model_group_id;
+                method = "PUT";
+            }
+            axios({ url: url, method: method, data: model })
+                .then(function (response) {
+                    console.log(response);
+                    layer.msg(response.data.message);
+                    if (!response.data.isSuccess) {
+                        return;
+                    }
+                    let datatable = table.cache.testReload;
+                    console.log(datatable);
+                    if (layType != true) {
+                        //修改
+                        for (let i = 0; i < datatable.length; i++) {
+                            if (datatable[i].model_group_id == response.data.content.model_group_id) {
+                                datatable.splice(i, 1, response.data.content);
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        //新增
+                        datatable.unshift(response.content)
+
+                    }
+                    tableReload(datatable)
+                    layer.close(generateLayer_index);
+                })
+                .catch(function (error) {
+
+                    layer.msg("发生了预料之外的错误!");
+                    console.log(error);
+                });
+
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        }),
+            $('.layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        function showLayer(data) {
+
+            console.log(table);
+            console.log(table.cache);
+            initFormValue(data);
+            let title = "新增系统模块";
+            document.getElementById("model_group_id").disabled = false;
+            document.getElementById("generate_btn").innerHTML = "立即创建";
+            if (layType != true) {
+                title = "编辑系统模块";
+                document.getElementById("model_group_id").disabled = true;
+                document.getElementById("generate_btn").innerHTML = "立即修改";
+            }
+            generateLayer_index = layer.open({
+                type: 1
+                , title: title //不显示标题栏
+                , closeBtn: false
+                , area: ['1100px', '600px']
+                , shade: 0.8
+                , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                //, btn: ['火速围观', '残忍拒绝']
+                , btnAlign: 'c'
+                , moveType: 1 //拖拽模式，0或者1
+                , content: $('#generate_layer') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+
+            });
+        };
+        function initFormValue(data) {
+            if (data == undefined) {
+
+                form.val("generate-form", {
+                    model_group_id: '',
+                    model_group_code: '',
+                    model_group_name: '',
+                    parent_id: '',
+                    sort_flag: '',
+                    enable_flag: '',
+                    image_url: '',
+                    group_belong: '',
+                    biz_sys_code: '',
+                })
+                return;
+            }
+            form.val("generate-form", {
+                model_group_id: data.model_Group_Id,
+                model_group_code: data.model_Group_Code,
+                model_group_name: data.model_Group_Name,
+                parent_id: data.parent_Id,
+                sort_flag: data.sort_Flag,
+                enable_flag: data.enable_Flag,
+                image_url: data.image_Url,
+                group_belong: data.group_Belong,
+                biz_sys_code: data.biz_sys_Code,
+
+
+            })
+        }
+
+
+        function tableReload(datatable) {
+            console.log(datatable);
+            table.reload("testReload", {
+                data: datatable
+            })
+        }
+
+    });
+
+
+
+</script>
+
+
+

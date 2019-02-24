@@ -1,0 +1,503 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+<style>
+    .layui-layer-shade {
+        display: none;
+    }
+
+    .layui-select-title input {
+        width: 180px;
+    }
+</style>
+<div>
+
+    <span class="layui-breadcrumb">
+        <a href="/">首页</a>
+        <a href="/demo/">系统用户</a>
+        <a><cite>用户管理</cite></a>
+    </span>
+    <div class="layui-form" style="background-color:#F2F2F2;padding:30px 20px;margin-top:20px;">
+        <div class="layui-form-item">
+            用户账号：
+            <div class="layui-inline">
+                <input class="layui-input" name="id" id="search_user_account" autocomplete="off">
+            </div>
+            用户名称：
+            <div class="layui-inline">
+                <input class="layui-input" name="id" id="search_user_name" autocomplete="off">
+            </div>
+            组织机构：
+            <div class="layui-inline">
+                <input class="layui-input" name="id" id="search_demoReload" autocomplete="off">
+            </div>
+            是否有效：
+            <div class="layui-inline">
+                <select name="interest" id="search_user_is_ldap" lay-filter="aihao">
+                    <option value=""></option>
+                    <option value="0" selected="">有效</option>
+                    <option value="1">无效</option>
+                </select>
+            </div>
+            用户类型：
+            <div class="layui-inline">
+                <select name="interest" id="search_user_ower" lay-filter="aihao">
+                    <option value=""></option>
+                    <option value="1">管理员</option>
+                    <option value="2">领导</option>
+                    <option value="4">kds报表用户</option>
+                </select>
+            </div>
+
+        </div>
+        <div class="layui-form-item" style="margin-top:30px;">
+            <button class="layui-btn btn-search" data-type="search">条件查询</button>
+            <button class="layui-btn" data-type="showGenerateLayer">新增用户</button>
+            <button class="layui-btn" data-type="getCheckData">选中行删除</button>
+            <a class="layui-btn" href="/api/sysuserinfodata/export">导出所有</a>
+        </div>
+
+    </div>
+    <table class="layui-hide" id="test" lay-filter="sysuser"> </table>
+
+</div>
+<div id="generate_layer" style="display:none; padding:40px;">
+    <div class="layui-form layui-form-pane" action="" lay-filter="generate-form">
+        <div class="layui-form-item">
+
+            <div class="layui-inline">
+                <label class="layui-form-label">登录帐号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="user_account" id="user_account" autocomplete="off" placeholder="登录帐号" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">用户密码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="user_password" id="user_password" autocomplete="off" placeholder="用户密码" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">用户名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="user_name" id="user_name" autocomplete="off" placeholder="用户名称" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">电子邮件</label>
+                <div class="layui-input-block">
+                    <input type="text" name="user_email" id="user_email" autocomplete="off" placeholder="用户电子邮件地址" class="layui-input" lay-verify="email">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">手机号码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="user_mobile_no" id="user_mobile_no" autocomplete="off" placeholder="用户手机号码" class="layui-input" lay-verify="phone">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">是否ldap</label>
+                <div class="layui-input-block">
+                    <select name="interest" id="user_is_ldap" lay-filter="aihao">
+                        <option value=""></option>
+                        <option value="0" selected="">否</option>
+                        <option value="1">是</option>
+
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">默认语言</label>
+                <div class="layui-input-block">
+                    @*<input type="text" name="title" id="language_code" autocomplete="off" placeholder="用户默认语言" class="layui-input">*@
+                    <select name="interest" id="language_code" lay-filter="aihao">
+                        <option value=""></option>
+                        <option value="zh-cn" selected="">中文</option>
+                        <option value="en-us">英文</option>
+
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">用户类型</label>
+                <div class="layui-input-block">
+                    <select name="interest" id="user_ower" lay-filter="aihao">
+                        <option value=""></option>
+                        <option value="1">管理员</option>
+                        <option value="2">领导</option>
+                        <option value="4" selected="">kds报表用户</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+   
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">开始日期</label>
+                <div class="layui-input-block">
+                    <input type="text" name="eff_start_date" id="eff_start_date" autocomplete="off" class="layui-input" lay-verify="date">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">结束日期</label>
+                <div class="layui-input-block">
+                    <input type="text" name="eff_end_date" id="eff_end_date" autocomplete="off" class="layui-input" lay-verify="date">
+                </div>
+            </div>
+
+            <div class="layui-inline">
+                <label class="layui-form-label">锁定用户</label>
+                <div class="layui-input-block">
+                    <select name="interest" id="user_is_lock" lay-filter="aihao">
+                        <option value=""></option>
+                        <option value="0" selected="">否</option>
+                        <option value="1">是</option>
+
+
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <button class="layui-btn" data-type="generate" id="generate_btn" lay-submit lay-filter="submit">立即创建</button>
+            <button class="layui-btn layui-layer-btn1" lay-filter="demo2" data-type="closeGenerateLayer">取消</button>
+        </div>
+    </div>
+
+
+</div>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script>
+
+    layui.use(['table', 'element', 'layer', 'form', 'laydate'], function () {
+        var table = layui.table;
+        var element = layui.element;
+        var layer = layui.layer;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var generateLayer_index = 0;
+        var layType = true;//true 新增  false 编辑
+        var user_id = 0;
+        //日期
+        laydate.render({
+            elem: '#eff_start_date'
+        });
+        laydate.render({
+            elem: '#eff_end_date'
+        });
+
+
+        table.render({
+            elem: '#test'
+            , url: '/api/sysuserinfodata/search/'           
+            , contentType: 'application/json'
+            , method: 'post'
+            , parseData: function (res) { //res 即为原始返回的数据
+                return {
+                    "status": res.isSuccess,
+                    "code": res.isSuccess == true ? 0 : 1, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": res.content.total, //解析数据长度
+                    "data": res.content.data //解析数据列表
+                };
+            }
+
+            , cols: [[
+
+                { type: 'checkbox', fixed: 'left', width: 40 }
+                , { title:'操作', align: 'center', toolbar: '#barDemo', fixed: 'left', width: 120 }//这里的toolbar值是模板元素的选择器
+
+                , { field: 'user_Id', width: 80, title: 'ID', sort: true,fixed: 'left'  }
+                , { field: 'user_Account', title: '用户账号' }
+                , { field: 'user_Name', title: '用户名', sort: true }
+                , { field: 'user_Org_Id', title: '用户组别', }
+                , { field: 'user_Email', title: '邮箱地址', sort: true }
+                , { field: 'user_Is_Ldap', title: '是否ldap用户' }
+                , { field: 'user_Mobile_No', title: '手机号', sort: true }
+                , { field: 'user_Ower', title: '用户类型', sort: true }
+                , { field: 'language_Code', title: '默认语言', sort: true }
+                , { field: 'user_Is_Lock', title: '是否锁定', sort: true }
+                , { field: 'eff_Start_Date', title: '有效开始日期', sort: true }
+                , { field: 'eff_End_Date', title: '有效结束日期', sort: true }
+                , { field: 'creation_Date', title: '创建时间', sort: true }
+            ]]
+            , id: 'testReload'
+            , page: true,
+            text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+
+
+        table.on('checkbox(sysuser)', function (obj) {
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(sysuser)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                layer.msg('ID：' + data.id + ' 的查看操作');
+            } else if (obj.event === 'del') {
+                console.log("delete");
+                let confirm_title = "确认删除账号" + data.user_Account + "的记录么";
+                layer.confirm(confirm_title, function (index) {
+                    layer.close(index);
+                    axios.delete('/api/SysUserInfoData/' + data.user_Id)
+                        .then(function (response) {
+                            console.log(response);
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+                            obj.del();
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+
+                });
+            } else if (obj.event === 'edit') {
+                // layer.alert('编辑行：<br>' + JSON.stringify(data))
+                console.log(data);
+                user_id = data.user_Id
+                layType = false;
+                showLayer(data);
+            }
+        });
+
+        var $ = layui.$, active = {
+            getCheckData: function () { //获取选中数据
+                var checkStatus = table.checkStatus('testReload')
+                    , data = checkStatus.data;
+
+
+                layer.confirm("确认删除" + data.length + "条记录么", function (index) {
+                    layer.close(index);
+
+                    let ids = [];
+                    let parms = "?";
+                    for (let i = 0; i < data.length; i++) {
+                        ids.push(data[i].user_Id);
+                        parms += "ids=" + data[i].user_Id + "&";
+                    }
+                    parms = parms.substring(0, parms.length - 1);
+                    //layer.alert(JSON.stringify(data));
+                    axios.delete("/api/sysuserinfodata/batchdelete/" + parms)
+                        .then(function (response) {
+                            console.log(response);
+                            layer.msg(response.data.message);
+                            if (!response.data.isSuccess) {
+                                return;
+                            }
+
+                            //移除
+                            let tabledata = table.cache.testReload;
+                            //for (let i = 0; i < tabledata.length; i++) {
+                            //    for (let j = 0; j < ids.length; j++) {
+                            //        if (tabledata[i].user_Id == ids[j]) {
+                            //            tabledata.splice(i, 1);
+                            //        }
+                            //    }
+                            //}
+                            //console.log(tabledata);
+                            tableReload(tabledata);
+                            
+                            
+                        })
+                        .catch(function (error) {
+                            layer.msg("发生了预料之外的错误!");
+                            console.log(error);
+                        });
+                });
+
+                
+            },
+            search: function () {
+                console.log('reload');
+                let pars = {
+                    limit: 10,
+                    page: 1,
+                    User_Account: $("#search_user_account").val(),
+                    User_Name: $("#search_user_name").val(),
+                    User_Is_Ldap: 0,
+                    User_Ower: 0,
+
+                }
+                if ($("#search_user_ower").val() != "") {
+                    pars.User_Ower = Number($("#search_user_ower").val());
+                }
+                if ($("#search_user_is_ldap").val() != "") {
+                    pars.User_Is_Ldap = $("#search_user_is_ldap").val() == "1";
+                }
+                //执行重载
+                console.log(pars);
+                table.reload('testReload', {
+                    where: pars,
+                    contentType: 'application/json',
+                    method: 'post'
+                });
+            },
+            showGenerateLayer: function () {
+                console.log('show');
+                layType = true;
+                showLayer();
+            },
+            closeGenerateLayer: function () {
+                layer.close(generateLayer_index);
+            },
+
+        };
+        form.on('submit(submit)', function () {
+            console.log('save')
+            let model = {
+                useraccount: $("#user_account").val(),
+                username: $("#user_name").val(),
+                userpassword: $("#user_password").val(),
+                useremail: $("#user_email").val(),
+                userisldap: $("#user_is_ldap").val() == "1",
+                usermobileno: $("#user_mobile_no").val(),
+                userower: Number($("#user_ower").val()),
+                languagecode: $("#language_code").val(),
+                userislock: $("#user_is_lock").val() == "1",
+                effstartdate: $("#eff_start_date").val(),
+                effenddate: $("#eff_end_date").val(),
+            };
+
+            console.log(model);
+            let url = "/api/sysuserinfodata";
+            let method = "POST";
+            if (layType != true) {
+                url = "/api/sysuserinfodata/" + user_id;
+                method = "PUT";
+            }
+            axios({ url: url, method: method, data: model })
+                .then(function (response) {
+                    console.log(response);
+                    layer.msg(response.data.message);
+                    if (!response.data.isSuccess) {
+                        return;
+                    }
+                    let datatable = table.cache.testReload;
+                    console.log(datatable);
+                    if (layType != true) {
+                        //修改
+                        for (let i = 0; i < datatable.length; i++) {
+                            if (datatable[i].user_Id == response.data.content.user_Id) {
+                                datatable.splice(i, 1, response.data.content);
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        //新增
+                        datatable.unshift(response.content)
+
+                    }
+                    tableReload(datatable)
+                    layer.close(generateLayer_index);
+                })
+                .catch(function (error) {
+
+                    layer.msg("发生了预料之外的错误!");
+                    console.log(error);
+                });
+
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        }),
+            $('.layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        function showLayer(data) {
+
+            console.log(table);
+            console.log(table.cache);
+            initFormValue(data);
+            let title = "新增系统用户";
+            document.getElementById("user_account").disabled = false;
+            document.getElementById("generate_btn").innerHTML = "立即创建";
+            if (layType != true) {
+                title = "编辑系统用户";
+                document.getElementById("user_account").disabled = true;
+                document.getElementById("generate_btn").innerHTML = "立即修改";
+            }
+            generateLayer_index = layer.open({
+                type: 1
+                , title: title //不显示标题栏
+                , closeBtn: false
+                , area: ['1100px', '600px']
+                , shade: 0.8
+                , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                //, btn: ['火速围观', '残忍拒绝']
+                , btnAlign: 'c'
+                , moveType: 1 //拖拽模式，0或者1
+                , content: $('#generate_layer') //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+
+            });
+        };
+        function initFormValue(data) {
+            if (data == undefined) {
+
+                form.val("generate-form", {
+                    eff_end_date: "",
+                    eff_start_date: "",
+                    language_code: "",
+                    user_account: "",
+                    user_email: "",
+                    user_group_names: "",
+                    user_id: "",
+                    user_is_ldap: "",
+                    user_is_lock: "",
+                    user_mobile_no: "",
+                    user_name: "",
+                    user_org_id: "",
+                    user_ower: ""
+                })
+                return;
+            }
+            form.val("generate-form", {
+                eff_end_date: data.eff_End_Date,
+                eff_start_date: data.eff_Start_Date,
+                language_code: data.language_Code,
+                user_account: data.user_Account,
+                user_email: data.user_Email,
+                user_group_names: data.user_Group_Names,
+                user_id: data.user_Id,
+                user_is_ldap: data.user_Is_Ldap,
+                user_is_lock: data.user_Is_Lock,
+                user_mobile_no: data.user_Mobile_No,
+                user_name: data.user_Name,
+                user_org_id: data.user_Org_Id,
+                user_ower: data.user_Ower,
+                user_password: data.user_Password
+            })
+        }
+
+
+        function tableReload(datatable) {
+            console.log(datatable);
+            table.reload("testReload", {
+                data: datatable
+            })
+        }
+
+    });
+
+
+
+</script>
+
+
