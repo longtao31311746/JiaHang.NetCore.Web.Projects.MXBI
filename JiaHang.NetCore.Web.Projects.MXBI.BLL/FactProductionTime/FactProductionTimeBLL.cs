@@ -47,7 +47,8 @@ namespace JiaHang.NetCore.Web.Projects.MXBI.BLL.FactProductionTime
                 Where(b => (string.IsNullOrWhiteSpace(model.stRegion) || b.Stregion.Contains(model.stRegion))
             && (string.IsNullOrWhiteSpace(model.stCity) || b.Stcity.Contains(model.stCity))
             && (string.IsNullOrWhiteSpace(model.stDM) || b.Stdm.Contains(model.stDM))
-            && (string.IsNullOrWhiteSpace(model.storeCode) || b.Stcode.Contains(model.storeCode))).Select(e => e.Stcode).ToList();            //类型条件
+            && (string.IsNullOrWhiteSpace(model.storeCode) || b.Stcode.Contains(model.storeCode))).Select(e => e.Stcode).ToList();            
+            //类型条件
             //string sDataType = "";
             List<string> Types = new List<string> { "A-La-Cart", "AutoBelt", "Belt" };
             switch (model.dataType)
