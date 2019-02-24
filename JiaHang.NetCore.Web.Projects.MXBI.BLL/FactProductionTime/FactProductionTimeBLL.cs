@@ -49,7 +49,7 @@ namespace JiaHang.NetCore.Web.Projects.MXBI.BLL.FactProductionTime
             && (string.IsNullOrWhiteSpace(model.stDM) || b.Stdm.Contains(model.stDM))
             && (string.IsNullOrWhiteSpace(model.storeCode) || b.Stcode.Contains(model.storeCode))).Select(e => e.Stcode).ToList();            //类型条件
             //string sDataType = "";
-            List<string> Types = new List<string> { ""};
+            List<string> Types = new List<string> { "A-La-Cart", "AutoBelt", "Belt" };
             switch (model.dataType)
             {
                 case 1:
